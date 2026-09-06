@@ -1,0 +1,16 @@
+dist/
+dist/**
+dist_backup/
+dist_backup/**
+node_modules/
+application/
+application-temp/
+android-app/
+android supa/
+electron-admin/
+electron/
+ios-app/
+*.sql
+*.exe
+*.dmg
+*.pkg

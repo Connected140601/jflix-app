@@ -1,0 +1,11 @@
+{
+  "version": "1.4.1",
+  "releaseNotes": "Supabase Google Sign-In integration, navigation guard bypass for OAuth, and performance improvements.",
+  "downloads": {
+    "mac-arm64": "https://pub-200cfe5effe94692ae21875b18599cee.r2.dev/JFlix-1.4.1-arm64.pkg",
+    "mac-x64":   "https://pub-200cfe5effe94692ae21875b18599cee.r2.dev/JFlix-1.4.1-x64.pkg",
+    "win-x64":   "https://pub-200cfe5effe94692ae21875b18599cee.r2.dev/JFlix-Setup-1.4.1.exe",
+    "win-portable": "https://pub-200cfe5effe94692ae21875b18599cee.r2.dev/JFlix-1.4.1-Portable.exe",
+    "android": "https://pub-200cfe5effe94692ae21875b18599cee.r2.dev/JFlix%201.4.4.apk"
+  }
+}

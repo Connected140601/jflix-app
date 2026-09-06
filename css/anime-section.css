@@ -1,0 +1,11 @@
+/* JFlix Anime Section Styles v9.0 - Modern Design */ 
+.anime-section {
+    padding: 20px;
+    background-color: #141414;
+}
+
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}

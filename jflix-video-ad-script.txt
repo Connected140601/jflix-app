@@ -1,0 +1,28 @@
+JFLIX 12-SECOND VIDEO AD - GROK AI STUDIO PROMPT
+================================================
+
+Brand: JFlix
+Website: jflix.uk
+Duration: 12 seconds
+Style: Cinematic, Netflix-quality promotional video
+
+---
+
+AI VIDEO GENERATION PROMPT (Under 4100 characters)
+--------------------------------------------------
+
+"Create a stunning 12-second cinematic promotional video for JFlix streaming website (jflix.uk). High-production-value commercial with professional visuals.
+
+[0-2 seconds] OPENING: JFlix logo animates in with dramatic red glow (#e50914), cinematic lighting, particle effects. Text 'JFlix.uk' fades in below. Quick flash of website homepage. Camera: Slow zoom.
+
+[2-5 seconds] CONTENT: Fast carousel showing 5 categories - Movies, TV Shows, Anime, Korean Dramas, Cartoons with smooth transitions. Text: 'Movies • TV Shows • Anime • K-Dramas • Cartoons'. Dynamic camera movement.
+
+[5-8 seconds] PLATFORMS: Platform icons pop in - Apple (macOS), Windows, Android, iPhone. Each with glow effect. Text: 'Available on ALL your devices'. Smooth pan across icons.
+
+[8-12 seconds] CTA: Large JFlix logo with pulsing red glow. URL 'jflix.uk' below. Download buttons slide in: macOS, Windows, Android, iOS. Text: 'Start Streaming FREE Today! Visit jflix.uk'. Dramatic final shot.
+
+VISUAL STYLE: Dark navy background (#1a1a2e), Netflix red (#e50914), Cyan accent (#4ecdc4). Modern, sleek, rounded corners, glass morphism. Smooth transitions, bold typography, cinematic lighting. 4K, 60fps.
+
+AUDIO: Cinematic building music, bass drops, whoosh sounds, satisfying dings. Optional voiceover: 'JFlix - Your ultimate streaming destination. Movies, TV shows, anime, K-dramas, cartoons. 100% FREE. No ads. Available on all devices. Visit jflix.uk.'
+
+QUALITY: Professional-grade visuals, smooth animations, high-quality transitions, cinematic camera movements, consistent brand identity. Premium streaming service commercial quality."

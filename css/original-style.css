@@ -1,0 +1,164 @@
+/* Original Style CSS for Player and Details Pages */
+
+/* Ensure consistent styling for all content types */
+body.original-style {
+  /* Preserve the original styling */
+  --movies-color: #ff5252;
+  --tvshows-color: #4caf50;
+  --anime-color: #2196f3;
+  --korean-color: #ff9800;
+}
+
+/* Player Page Specific Styles */
+body.original-style .player-page-container {
+  /* Ensure consistent styling regardless of content type */
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+body.original-style .movie-banner {
+  /* Keep original banner styling */
+  position: relative;
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+body.original-style .movie-info-overlay {
+  /* Preserve original overlay styling */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5) 50%, transparent);
+  color: #fff;
+}
+
+/* Details Page Specific Styles */
+body.original-style .details-container {
+  /* Ensure consistent styling regardless of content type */
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+body.original-style .details-backdrop {
+  /* Keep original backdrop styling */
+  position: relative;
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+body.original-style .details-content {
+  /* Preserve original content styling */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+body.original-style .details-header {
+  /* Keep original header styling */
+  display: flex;
+  gap: 30px;
+}
+
+/* Consistent Styling for Media Types */
+body.original-style .genre-tag {
+  /* Apply consistent genre tag styling */
+  display: inline-block;
+  padding: 5px 10px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure consistent styling for all media types */
+body.original-style .media-type-movie,
+body.original-style .media-type-tv,
+body.original-style .media-type-anime,
+body.original-style .media-type-korean {
+  /* Apply consistent styling regardless of media type */
+  display: block;
+}
+
+/* Apply consistent button styling */
+body.original-style .watch-button {
+  background-color: var(--primary-color);
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+body.original-style .watch-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure consistent episode selector styling */
+body.original-style .episode-selector {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+body.original-style .season-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+body.original-style .season-tab {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+body.original-style .season-tab.active {
+  background-color: var(--primary-color);
+  color: #000;
+}
+
+/* Ensure consistent styling for similar/recommended content */
+body.original-style .similar-grid,
+body.original-style .recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  body.original-style .details-header {
+    flex-direction: column;
+  }
+  
+  body.original-style .movie-banner,
+  body.original-style .details-backdrop {
+    height: 300px;
+  }
+}

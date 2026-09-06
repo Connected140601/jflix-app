@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Test Page</title>
+<style>        body { font-family: Arial, sans-serif; margin: 20px; }
+        .ad-test { border: 2px solid #ccc; margin: 20px 0; padding: 20px; text-align: center; }
+        .ad-test h3 { margin-top: 0; }
+</style>
+<body>
+    <h1>Adsterra Ad Test Page</h1>
+    
+    <div class="ad-test">
+        <h3>Mobile Banner Ad (320x50)</h3>
+        <script>
+          atOptions = {
+            'key' : '3d2cdb24291c0ef1776d8e5f8b73b5f7',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script src="https://heavinessslight.com/3d2cdb24291c0ef1776d8e5f8b73b5f7/invoke.js"></script>
+    </div>
+
+    <div class="ad-test">
+        <h3>Medium Rectangle Ad (300x250)</h3>
+        <script>
+          atOptions = {
+            'key' : '985241e815704103478c2ec28530d20a',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script src="https://heavinessslight.com/985241e815704103478c2ec28530d20a/invoke.js"></script>
+    </div>
+
+    <div class="ad-test">
+        <h3>Leaderboard Ad (728x90)</h3>
+        <script>
+          atOptions = {
+            'key' : 'a3497336bfd1bd0d9eb6314a119b322d',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://heavinessslight.com/a3497336bfd1bd0d9eb6314a119b322d/invoke.js"></script>
+    </div>
+
+    <div class="ad-test">
+        <h3>Social Bar Ad</h3>
+        <script defer src="https://heavinessslight.com/55/db/4a/55db4af92ab5047a54bf7fe8d75e9b9d.js"></script>
+    </div>
+
+    <div style="margin-top: 40px; padding: 20px; background: #f0f0f0;">
+        <h3>Debug Information</h3>
+        <p>If ads are not showing, check:</p>
+        <ul>
+            <li>Browser console for errors</li>
+            <li>Ad blocker is disabled</li>
+            <li>Network connectivity to heavinessslight.com</li>
+            <li>Ad codes are valid and active</li>
+        </ul>
+    </div>
+</body>
+</html>

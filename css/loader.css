@@ -1,0 +1,304 @@
+/* ============================================================
+   JFlix Ultra-Smooth Cinematic Loader & Skeleton System
+   Tier-1 Streaming Quality (Netflix / Loklok / Prime Video)
+   ============================================================ */
+
+.loader-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 45%, rgba(14, 16, 26, 0.96) 0%, rgba(5, 6, 11, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, visibility;
+}
+
+.loader-wrapper.visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.loader-wrapper.hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  display: none;
+}
+
+/* Loader Container with Spring Scale */
+.loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.35rem;
+  transform: scale(0.94);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.loader-wrapper.visible .loader-inner {
+  transform: scale(1);
+}
+
+.loader-wrapper.hidden .loader-inner {
+  transform: scale(0.94);
+}
+
+/* Multi-Layered Glowing Spinner */
+.loader-spinner-box {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: transparent;
+  border: 3px solid rgba(255, 255, 255, 0.07);
+  border-top-color: var(--brand, #e50914);
+  border-right-color: #ff3b45;
+  box-shadow: 0 0 32px rgba(229, 9, 20, 0.45),
+              inset 0 0 16px rgba(229, 9, 20, 0.2);
+  animation: jflixSmoothSpin 1.1s cubic-bezier(0.4, 0.05, 0.2, 0.95) infinite;
+  will-change: transform;
+}
+
+/* Ambient Diffused Pulsing Halo */
+.loader::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 9, 20, 0.35) 0%, rgba(138, 112, 255, 0.15) 50%, transparent 70%);
+  filter: blur(14px);
+  animation: jflixAmbientBreathe 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Counter-Rotating Inner Violet Glow Ring */
+.loader::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-bottom-color: #8a70ff;
+  border-left-color: #ff4d94;
+  box-shadow: 0 0 16px rgba(138, 112, 255, 0.35);
+  animation: jflixSmoothSpinReverse 1.5s linear infinite;
+  will-change: transform;
+}
+
+/* Sleek Glowing Center Ruby Gem */
+.loader-core {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #ff4d55 50%, #e50914 100%);
+  box-shadow: 0 0 16px rgba(255, 77, 85, 0.9), 0 0 8px #ffffff;
+  animation: jflixCorePulse 1.6s ease-in-out infinite;
+  z-index: 2;
+}
+
+/* Cinematic Shimmer Typography */
+.loader-text {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    #ffffff 25%,
+    #ff6b72 50%,
+    #ffffff 75%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: jflixTextShimmer 2.2s linear infinite;
+  text-align: center;
+  user-select: none;
+}
+
+/* Indeterminate Light Beam Progress Bar */
+.loader-bar {
+  width: 140px;
+  height: 2.5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+  margin-top: -4px;
+}
+
+.loader-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent 0%, #e50914 40%, #ff6b72 50%, #8a70ff 70%, transparent 100%);
+  border-radius: 99px;
+  animation: jflixBeamSweep 1.6s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
+}
+
+/* Keyframe Animations */
+@keyframes jflixSmoothSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes jflixSmoothSpinReverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes jflixAmbientBreathe {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes jflixCorePulse {
+  0%, 100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+@keyframes jflixTextShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes jflixBeamSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  50% {
+    transform: translateX(120%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+/* ── Universal Shimmer Skeleton Placeholders ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: 8px;
+}
+
+.skeleton-card {
+  aspect-ratio: 2/3;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-top: 8px;
+  border-radius: 6px;
+  width: 80%;
+}
+
+.skeleton-banner {
+  width: 100%;
+  height: 460px;
+  border-radius: 18px;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Universal In-Page Content Loading Indicator ── */
+.loading-indicator {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 48px 24px !important;
+  width: 100% !important;
+  min-height: 220px !important;
+  color: #ffffff !important;
+}
+
+.loading-indicator .spinner,
+.spinner {
+  position: relative !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: 3px solid rgba(255, 255, 255, 0.08) !important;
+  border-top-color: #e50914 !important;
+  border-right-color: #ff3b45 !important;
+  box-shadow: 0 0 24px rgba(229, 9, 20, 0.45) !important;
+  animation: jflixSmoothSpin 1.1s cubic-bezier(0.4, 0.05, 0.2, 0.95) infinite !important;
+  margin-bottom: 16px !important;
+  will-change: transform !important;
+}
+
+.loading-indicator p {
+  font-family: var(--font-display, 'Outfit', sans-serif) !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0 !important;
+  animation: jflixTextShimmer 2.2s linear infinite !important;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0%, #ffffff 50%, rgba(255, 255, 255, 0.6) 100%) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+

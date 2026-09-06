@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy Button Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #141414;
+            color: white;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #2c2c2c;
+            border-radius: 10px;
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #e50914 0%, #ff0a16 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+        }
+        .link-display {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .link-display code {
+            flex: 1;
+            color: #00ff00;
+            word-break: break-all;
+        }
+</style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Copy Button Test</h1>
+        <p>Test the copy functionality:</p>
+        
+        <div class="link-display">
+            <code id="link-to-copy">https://jflix.uk/test-link</code>
+            <button class="copy-btn" onclick="copySocialLink()">
+                <i class="fas fa-copy"></i>
+                Copy
+            </button>
+        </div>
+        
+        <p>Click the copy button above. It should:</p>
+        <ol>
+            <li>Copy the link to your clipboard</li>
+            <li>Show "Copied!" feedback</li>
+            <li>Change color to green</li>
+            <li>Revert after 2 seconds</li>
+        </ol>
+        
+        <button onclick="testModal()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            Test Social Modal
+        </button>
+    </div>
+
+    <script src="js/smart-social-handler.js?v=48.0"></script>
+    <script>
+        function testModal() {
+            smartSocialHandler.createModal('facebook', 'https://jflix.uk/test-page');
+        }
+        
+        // Global copy function for onclick handlers
+        function copySocialLink() {
+            smartSocialHandler.copyLink();
+        }
+    </script>
+</body>
+</html>

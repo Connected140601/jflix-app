@@ -1,0 +1,456 @@
+/* Unified Content Page Styles */
+/* This CSS provides consistent layout, structure, and design for all content category pages */
+
+/* ========================================
+   CONTENT PAGE VARIABLES
+   ======================================== */
+:root {
+  --content-max-width: 1400px;
+  --content-padding: 40px;
+  --content-padding-mobile: 15px;
+  --content-padding-tablet: 20px;
+  --section-spacing: 40px;
+  --card-gap: 15px;
+  --card-min-width: 160px;
+  --card-max-width: 200px;
+  --banner-height: 60vh;
+  --banner-height-mobile: 50vh;
+  --category-badge-size: 12px;
+}
+
+/* ========================================
+   CONTENT CONTAINER
+   ======================================== */
+.content-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+}
+
+/* ========================================
+   SECTION NAVIGATION BUTTONS
+   ======================================== */
+.section-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+}
+
+.section-header h2 {
+  margin-bottom: 0 !important;
+  flex: 1 !important;
+}
+
+.nav-buttons {
+  display: flex !important;
+  gap: 10px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.nav-btn {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  font-size: 16px !important;
+  z-index: 100 !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+
+.nav-btn i {
+  color: #ffffff !important;
+  font-size: 16px !important;
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  transform: scale(1.1) !important;
+}
+
+.nav-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.nav-btn.disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.nav-btn.disabled:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: none !important;
+  opacity: 0.3 !important;
+}
+
+/* Mobile: Adjust nav buttons for small screens */
+@media (max-width: 768px) {
+  .nav-buttons {
+    display: flex !important;
+    gap: 8px !important;
+  }
+  
+  .nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    font-size: 14px !important;
+  }
+  
+  .nav-btn i {
+    font-size: 14px !important;
+  }
+  
+  .section-header {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+  
+  .section-header h2 {
+    font-size: 1.2rem !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    padding: 0 var(--content-padding-mobile);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .content-container {
+    padding: 0 var(--content-padding-tablet);
+  }
+}
+
+/* ========================================
+   CATEGORY HEADER
+   ======================================== */
+.category-header {
+  margin-bottom: var(--section-spacing);
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-header h1 i {
+  color: var(--primary-color);
+}
+
+.category-header p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* ========================================
+   FILTER SECTION
+   ======================================== */
+.filter-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius);
+}
+
+.filter-section h3 {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-btn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Category-specific filter colors */
+.filter-btn.movies.active {
+  background: var(--movies-color);
+  border-color: var(--movies-color);
+}
+
+.filter-btn.tvshows.active {
+  background: var(--tvshows-color);
+  border-color: var(--tvshows-color);
+}
+
+.filter-btn.anime.active {
+  background: var(--anime-color);
+  border-color: var(--anime-color);
+}
+
+.filter-btn.korean.active {
+  background: var(--korean-color);
+  border-color: var(--korean-color);
+}
+
+.filter-btn.cartoon.active {
+  background: var(--cartoon-color);
+  border-color: var(--cartoon-color);
+}
+
+/* ========================================
+   CONTENT SECTIONS
+   ======================================== */
+.content-section {
+  margin-bottom: var(--section-spacing);
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.content-section h2 .category-icon {
+  color: var(--primary-color);
+}
+
+.content-section h2 .category-badge {
+  font-size: var(--category-badge-size);
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+/* Category-specific badges */
+.movies-badge {
+  background: var(--movies-color);
+}
+
+.tvshows-badge {
+  background: var(--tvshows-color);
+}
+
+.anime-badge {
+  background: var(--anime-color);
+}
+
+.korean-badge {
+  background: var(--korean-color);
+}
+
+.cartoon-badge {
+  background: var(--cartoon-color);
+}
+
+/* ========================================
+   CONTENT GRID
+   ======================================== */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  gap: var(--card-gap);
+}
+
+@media (min-width: 1200px) {
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-max-width), 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .content-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* ========================================
+   HORIZONTAL LIST (for rows)
+   ======================================== */
+.content-list {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--card-gap);
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.content-list::-webkit-scrollbar {
+  display: none;
+}
+
+.content-list .media-card {
+  flex: 0 0 auto;
+  width: var(--card-min-width);
+}
+
+@media (min-width: 1200px) {
+  .content-list .media-card {
+    width: var(--card-max-width);
+  }
+}
+
+/* ========================================
+   LOADING & ERROR STATES
+   ======================================== */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.loading-indicator .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.error-message {
+  padding: 20px;
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.empty-message {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   AD SECTIONS
+   ======================================== */
+.ad-section {
+  margin: 30px 0;
+  padding: 15px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--border-radius);
+}
+
+.ad-section:first-of-type {
+  margin-top: 0;
+}
+
+/* Mobile: Edge-to-edge ads with no side margins/padding */
+@media (max-width: 768px) {
+  .ad-section {
+    margin: 20px 0;
+    padding: 10px 0;
+    margin-left: calc(var(--content-padding-mobile) * -1);
+    margin-right: calc(var(--content-padding-mobile) * -1);
+    width: calc(100% + var(--content-padding-mobile) * 2);
+    max-width: calc(100% + var(--content-padding-mobile) * 2);
+    border-radius: 0;
+  }
+
+  .ad-section .ad-desktop {
+    display: none !important;
+  }
+
+  .ad-section .ad-mobile {
+    display: block !important;
+  }
+
+  .ad-section iframe {
+    max-width: 100%;
+    width: 100% !important;
+  }
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+  .category-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .content-section h2 {
+    font-size: 1.2rem;
+  }
+  
+  .filter-buttons {
+    gap: 8px;
+  }
+  
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  :root {
+    --section-spacing: 30px;
+    --card-min-width: 140px;
+  }
+}
+
+/* ========================================
+   PWA MODE ADJUSTMENTS
+   ======================================== */
+@media (display-mode: standalone) {
+  .content-container {
+    padding-left: var(--content-padding-mobile) !important;
+    padding-right: var(--content-padding-mobile) !important;
+  }
+}

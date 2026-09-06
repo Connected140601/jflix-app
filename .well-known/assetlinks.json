@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jflix.app",
+      "sha256_cert_fingerprints": [
+        "A5:EF:76:9B:05:F7:A0:91:2F:D7:5E:E6:3D:3B:8C:16:5B:0E:BB:5D:AA:03:6B:05:EE:22:6D:2D:90:F3:D8:E0"
+      ]
+    }
+  }
+]

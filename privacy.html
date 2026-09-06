@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  
+  <!-- Favicon and PWA Icons - Consistent Across All Platforms -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512x512.png">
+  <title>Privacy Policy - JFlix</title>
+
+  <!-- Hide ads in Android WebView -->
+  <script>
+    (function() {
+      var ua = navigator.userAgent;
+      var isAndroidWebView = /Android/.test(ua) && /wv/.test(ua);
+      if (isAndroidWebView) {
+        var style = document.createElement('style');
+        style.textContent = '.ad-desktop, .ad-mobile, .ad-mobile-only, .search-ad-left, .ad-sidebar { display: none !important; }';
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/tokens.css?v=1.0">
+  <link rel="stylesheet" href="css/motion.css?v=1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.0">
+  <link rel="stylesheet" href="css/animations.css?v=48.0">
+  <link rel="stylesheet" href="css/home.css?v=49.0">
+  <link rel="stylesheet" href="css/common.css?v=49.0">
+  <link rel="stylesheet" href="css/legal.css?v=49.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js?v=48.0"></script>
+  <script src="js/loader.js?v=51.0"></script>
+  <script defer src="js/common.js?v=48.0"></script>
+  <script defer src="js/navbar.js?v=48.0"></script>
+  <link rel="stylesheet" href="css/loader.css?v=50.0">
+  <link rel="stylesheet" href="css/responsive.css?v=48.0">
+</head>
+<body>
+  <div id="loader" class="loader-wrapper">
+    <div class="loader-inner">
+      <div class="loader-spinner-box">
+        <div class="loader"></div>
+        <div class="loader-core"></div>
+      </div>
+      <div class="loader-text">Loading Privacy Policy</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+  <div class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="images/logo.svg" alt="JFlix Logo">
+        </div>
+      </a>
+      <button class="hamburger-menu" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+      </button>
+    </div>
+    <div class="navbar-right">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html" class="movies">Movies</a>
+        <a href="tvshows.html" class="tvshows">TV Shows</a>
+        <a href="anime.html" class="anime">Anime</a>
+        <a href="korean.html" class="korean">Korean TV</a>
+        <a href="cartoon.html" class="cartoon">Cartoons</a>
+        <a href="index.html?open_search=true" class="search-nav-link"><i class="fas fa-search"></i> Search</a>
+      </div>
+      <!-- Auth Buttons (shown when logged out) -->
+      <div class="auth-buttons" style="display: none; margin-left: 15px;">
+        <button class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </div>
+      <!-- User Menu (shown when logged in) -->
+      <div class="user-menu" style="display: none; margin-left: 15px;">
+        <a href="profile.html" data-no-loader style="display: flex; align-items: center; gap: 8px; text-decoration: none; position: relative;" title="Profile" aria-label="Profile">
+          <img src="" alt="User" class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #e50914;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Ccircle fill=%22%23666%22 cx=%2216%22 cy=%2216%22 r=%2216%22/%3E%3Ctext fill=%22%23fff%22 font-family=%22Arial%22 font-size=%2216%22 x=%2216%22 y=%2222%22 text-anchor=%22middle%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E';">
+          <span id="header-profile-unread-badge" style="position:absolute;top:-4px;right:-4px;background:#e50914;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;">0</span>
+          <span class="user-name" style="color: #fff; font-size: 13px; font-weight: 500;"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal-container">
+    <div class="legal-header">
+      <h1>Privacy Policy</h1>
+      <p>Last Updated: May 24, 2025</p>
+    </div>
+
+    <div class="legal-content">
+      <section>
+        <h2>1. Introduction</h2>
+        <p>At JFlix, we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your information when you use our website.</p>
+      </section>
+
+      <section>
+        <h2>2. Information We Collect</h2>
+        <p>We may collect the following types of information:</p>
+        <ul>
+          <li><strong>Usage Data:</strong> Information about how you use our website, including your browsing patterns, pages visited, and features used.</li>
+          <li><strong>Device Information:</strong> Information about your device, such as IP address, browser type, operating system, and device identifiers.</li>
+          <li><strong>Cookies and Similar Technologies:</strong> We use cookies and similar technologies to enhance your experience and collect information about your usage patterns.</li>
+        </ul>
+        <p>We do not collect personally identifiable information unless you voluntarily provide it to us.</p>
+      </section>
+
+      <section>
+        <h2>3. How We Use Your Information</h2>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Provide, maintain, and improve our services</li>
+          <li>Analyze usage patterns to enhance user experience</li>
+          <li>Detect and prevent fraudulent activity and security breaches</li>
+          <li>Comply with legal obligations</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Third-Party Services</h2>
+        <p>JFlix utilizes third-party services and APIs to provide content. These third-party services may collect information about you when you interact with their content through our platform. We do not control these third parties or their privacy practices.</p>
+        <p>The content displayed on JFlix is hosted on third-party servers. We do not store or host any media content on our own servers. When you access content through our platform, you may be subject to the privacy policies of these third-party content providers.</p>
+      </section>
+
+      <section>
+        <h2>5. Data Security</h2>
+        <p>We implement reasonable security measures to protect your information from unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet or electronic storage is 100% secure.</p>
+      </section>
+
+      <section>
+        <h2>6. Your Rights</h2>
+        <p>Depending on your location, you may have certain rights regarding your personal information, including:</p>
+        <ul>
+          <li>The right to access information we have about you</li>
+          <li>The right to correct inaccurate information</li>
+          <li>The right to delete your information</li>
+          <li>The right to object to processing of your information</li>
+        </ul>
+        <p>To exercise these rights, please contact us using the information provided below.</p>
+      </section>
+
+      <section>
+        <h2>7. Children's Privacy</h2>
+        <p>Our services are not intended for individuals under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected personal information from a child under 13, we will take steps to delete that information.</p>
+      </section>
+
+      <section>
+        <h2>8. Changes to This Privacy Policy</h2>
+        <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.</p>
+      </section>
+
+      <section>
+        <h2>9. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us at privacy@jflix.example.com.</p>
+      </section>
+    </div>
+  </div>
+
+
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Ad Section 1 - Legal Page Header -->
+  <div class="ad-section ad-legal-page-header" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Leaderboard Ad (728x90) - Desktop -->
+    <div class="ad-desktop" style="display: inline-block;">
+      <script>
+        atOptions = {
+          'key' : 'a3497336bfd1bd0d9eb6314a119b322d',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      </script>
+      <script src="https://heavinessslight.com/a3497336bfd1bd0d9eb6314a119b322d/invoke.js"></script>
+    </div>
+    <!-- Mobile Banner Ad (320x50) - Mobile -->
+    <div class="ad-mobile" style="display: none;">
+      <script>
+        atOptions = {
+          'key' : '3d2cdb24291c0ef1776d8e5f8b73b5f7',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script src="https://heavinessslight.com/3d2cdb24291c0ef1776d8e5f8b73b5f7/invoke.js"></script>
+    </div>
+  </div>
+
+  <!-- Ad Section 2 - Legal Page Middle -->
+  <div class="ad-section ad-legal-page-middle" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Vertical Banner Ad (160x300) -->
+    <script>
+      atOptions = {
+        'key' : '985241e815704103478c2ec28530d20a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script src="https://heavinessslight.com/985241e815704103478c2ec28530d20a/invoke.js"></script>
+  </div>
+
+  <!-- Ad Section 3 - Legal Page Bottom -->
+  <div class="ad-section ad-legal-page-bottom" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Removed - below-fold ad for better Adsterra compliance -->
+  </div>
+
+  <!-- Ad Section 4 - Before Footer -->
+  <div class="ad-section ad-before-footer" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Removed - below-fold ad for better Adsterra compliance -->
+  </div>
+
+    <script src="js/footer-loader.js?v=48.0"></script>
+  <script src="js/social-share.js?v=48.0"></script>
+  <script src="js/adblock-handler.js?v=48.0"></script>
+</body>
+</html>

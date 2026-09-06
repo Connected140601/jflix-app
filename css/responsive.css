@@ -1,0 +1,851 @@
+/* ============================================================
+   JFlix Responsive Styles v10.0 - Modern Mobile-First Design
+   Ensures perfect mobile UI, no horizontal scroll, dynamic stretch
+   ============================================================ */
+
+/* ============================================================
+   BASE MOBILE PREVENTIONS
+   ============================================================ */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Prevent iOS auto-zoom on input focus */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* ============================================================
+   MOBILE NAVBAR - Perfect Fit
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 56px;
+  }
+
+  .navbar {
+    padding-top: var(--safe-top) !important;
+    padding-bottom: 0 !important;
+    padding-left: max(12px, var(--safe-left)) !important;
+    padding-right: max(12px, var(--safe-right)) !important;
+    height: calc(var(--navbar-height) + var(--safe-top)) !important;
+    min-height: calc(var(--navbar-height) + var(--safe-top)) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .navbar-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .logo-link {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .logo img {
+    height: 32px !important;
+    max-height: 32px !important;
+    width: auto !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .navbar-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+  }
+
+  /* Hamburger - compact but tappable */
+  .hamburger-menu {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    flex-shrink: 0 !important;
+    order: 1 !important;
+  }
+
+  .hamburger-menu i {
+    font-size: 1.1rem !important;
+    margin: 0 !important;
+  }
+
+  .hamburger-menu span {
+    display: none !important;
+  }
+
+  /* Search - hidden on mobile navbar, shown in modal */
+  .search-wrapper {
+    display: none !important;
+  }
+
+  /* User menu / Profile button */
+  .user-menu {
+    display: flex;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    order: 2 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .user-menu a {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .user-menu .user-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  .user-menu .user-name,
+  .user-menu .premium-crown,
+  .user-menu .logout-btn {
+    display: none !important;
+  }
+
+  /* Auth buttons (login/signup) */
+  .auth-buttons {
+    display: flex;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    order: 2 !important;
+  }
+
+  /* Safety net: never show both auth-buttons and user-menu at the same time */
+  .navbar-right:has(.user-menu[style*="flex"]) .auth-buttons,
+  .navbar-right:has(.auth-buttons[style*="flex"]) .user-menu {
+    display: none !important;
+  }
+  html.is-ios-app .navbar-right .user-menu {
+    display: flex !important;
+  }
+  html.is-ios-app .navbar-right .auth-buttons {
+    display: none !important;
+  }
+
+  .auth-buttons button {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 16px !important;
+    white-space: nowrap !important;
+  }
+
+  .auth-buttons .login-btn {
+    padding: 6px 14px !important;
+  }
+
+  /* Get Premium button — compact & sleek on mobile */
+  .get-premium-btn,
+  #web-get-premium-btn {
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    gap: 5px !important;
+    border-radius: 18px !important;
+    min-height: 34px !important;
+    margin: 0 0 0 4px !important;
+    box-shadow: 0 2px 10px rgba(255,180,0,0.4) !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  .get-premium-btn i,
+  #web-get-premium-btn i {
+    font-size: 13px !important;
+    margin-right: 0 !important;
+  }
+
+  @media (max-width: 380px) {
+    .get-premium-btn,
+    #web-get-premium-btn {
+      padding: 6px 9px !important;
+      font-size: 0 !important;
+      min-width: 34px !important;
+    }
+    .get-premium-btn i,
+    #web-get-premium-btn i {
+      font-size: 14px !important;
+    }
+  }
+
+  /* Mobile search icon button */
+  .mobile-search-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+    order: 0 !important;
+  }
+
+  /* Nav links dropdown */
+  .nav-links {
+    top: calc(var(--navbar-height) + var(--safe-top)) !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 0 0 16px 16px !important;
+    padding: 12px 0 !important;
+    padding-bottom: max(16px, var(--safe-bottom)) !important;
+    background: linear-gradient(180deg, rgba(10,10,10,0.98) 0%, rgba(20,20,20,0.95) 100%) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  }
+
+  .nav-links a {
+    padding: 14px 24px !important;
+    font-size: 0.95rem !important;
+    text-align: left !important;
+    border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+  }
+}
+
+/* ============================================================
+   TABLET NAVBAR (769px - 1024px)
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --navbar-height: 64px;
+  }
+
+  .navbar {
+    padding: 0 20px !important;
+    height: var(--navbar-height) !important;
+  }
+
+  .logo img {
+    height: 42px !important;
+  }
+
+  .search-bar {
+    width: 160px !important;
+    max-width: 160px !important;
+  }
+
+  .search-bar:focus {
+    width: 200px !important;
+    max-width: 200px !important;
+  }
+}
+
+/* ============================================================
+   FULL-WIDTH LAYOUT - No side gaps
+   ============================================================ */
+@media (max-width: 768px) {
+  /* All main containers full width */
+  .content-container,
+  .movies-container,
+  .tvshows-container,
+  .anime-container,
+  .korean-container,
+  .cartoon-container {
+    padding: 0 12px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .row {
+    margin-bottom: 24px !important;
+    width: 100% !important;
+  }
+
+  .row h2 {
+    font-size: 1.1rem !important;
+    margin-bottom: 10px !important;
+    padding: 0 4px !important;
+  }
+
+  /* Banner full width */
+  .banner {
+    height: auto !important;
+    min-height: 52vh !important;
+    padding-top: calc(var(--navbar-height) + var(--safe-top) + 16px) !important;
+    margin-bottom: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .banner-content {
+    width: 100% !important;
+    padding: 20px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .banner-content h1 {
+    font-size: 1.6rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .banner-content p {
+    font-size: 0.9rem !important;
+    margin-bottom: 12px !important;
+    max-width: 100% !important;
+  }
+
+  .banner-buttons {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .banner-buttons .btn {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Lists / Carousels */
+  .list {
+    gap: 8px !important;
+    padding: 8px 4px !important;
+    width: 100% !important;
+  }
+
+  /* Cards */
+  .card,
+  .movie-card,
+  .tvshow-card,
+  .anime-card,
+  .korean-card,
+  .cartoon-card {
+    min-width: 130px !important;
+    max-width: 160px !important;
+    border-radius: 10px !important;
+  }
+
+  .card img,
+  .movie-card img,
+  .tvshow-card img,
+  .anime-card img,
+  .korean-card img,
+  .cartoon-card img {
+    border-radius: 10px !important;
+  }
+
+  .card-title {
+    font-size: 0.8rem !important;
+    margin-top: 6px !important;
+  }
+}
+
+/* ============================================================
+   DYNAMIC STRETCH - Cards grid responsive
+   ============================================================ */
+@media (max-width: 360px) {
+  .card,
+  .movie-card,
+  .tvshow-card,
+  .anime-card,
+  .korean-card,
+  .cartoon-card {
+    min-width: 110px !important;
+    max-width: 140px !important;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .card,
+  .movie-card,
+  .tvshow-card,
+  .anime-card,
+  .korean-card,
+  .cartoon-card {
+    min-width: 130px !important;
+    max-width: 160px !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .card,
+  .movie-card,
+  .tvshow-card,
+  .anime-card,
+  .korean-card,
+  .cartoon-card {
+    min-width: 150px !important;
+    max-width: 180px !important;
+  }
+}
+
+/* ============================================================
+   CONTENT PAGES - Movies, TV Shows, etc.
+   ============================================================ */
+@media (max-width: 768px) {
+  .content-grid,
+  .movies-grid,
+  .tvshows-grid,
+  .anime-grid,
+  .korean-grid,
+  .cartoon-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .page-header {
+    padding: 16px 12px !important;
+    margin-top: calc(var(--navbar-height) + var(--safe-top)) !important;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .page-header p {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* ============================================================
+   DETAILS PAGE
+   ============================================================ */
+@media (max-width: 768px) {
+  .details-container {
+    padding: 0 12px !important;
+    margin-top: calc(var(--navbar-height) + var(--safe-top)) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .details-poster {
+    width: 140px !important;
+    border-radius: 12px !important;
+  }
+
+  .details-title {
+    font-size: 1.4rem !important;
+  }
+
+  .details-meta {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .details-buttons {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .details-buttons .btn {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+/* ============================================================
+   PLAYER PAGE
+   ============================================================ */
+
+/* Desktop: ensure player doesn't overstretch beyond reasonable bounds */
+.player-content {
+  max-width: 1600px !important;
+  margin: 0 auto !important;
+  padding: 20px 24px 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+.player-box {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Force 16:9 aspect ratio container — overrides player.css */
+.video-container,
+.player-box .video-container,
+.movie-player-section .video-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 0 !important;
+  padding-top: 56.25% !important;
+  padding-bottom: 0 !important;
+  aspect-ratio: 16 / 9 !important;
+  overflow: hidden !important;
+  border-radius: 8px !important;
+  background: #000 !important;
+  box-sizing: border-box !important;
+}
+
+/* iframe fills container exactly — overrides player.css height:auto */
+#video-player,
+.video-container iframe#video-player,
+.video-container > iframe,
+.player-box iframe {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  border: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Loading message stays inside container */
+.video-message,
+.video-container .video-message {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2 !important;
+}
+
+/* Mobile player fixes */
+@media (max-width: 768px) {
+  .player-container {
+    margin-top: calc(var(--navbar-height) + var(--safe-top)) !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .player-content {
+    padding: 12px 0 0 0 !important;
+    gap: 16px !important;
+  }
+
+  .player-section {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .player-box {
+    border-radius: 0 !important;
+    margin-top: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  .video-container,
+  .player-box .video-container,
+  .movie-player-section .video-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    height: 0 !important;
+    padding-top: 56.25% !important;
+    padding-bottom: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  #video-player,
+  .video-container iframe#video-player,
+  .video-container > iframe,
+  .player-box iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    border: none !important;
+  }
+
+  .player-info {
+    padding: 16px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .server-selector {
+    padding: 0 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .episode-selector {
+    padding: 0 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .episode-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .movie-info {
+    padding: 16px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .movie-banner-container {
+    height: 30vh !important;
+  }
+}
+
+/* Small screens: ensure iframe never overflows */
+@media (max-width: 480px) {
+  .player-content {
+    padding: 8px 0 0 0 !important;
+  }
+
+  .video-container,
+  .player-box .video-container,
+  .movie-player-section .video-container {
+    border-radius: 0 !important;
+  }
+
+  .player-header-title {
+    padding: 10px 12px !important;
+  }
+
+  .player-header-title h3 {
+    font-size: 1rem !important;
+  }
+}
+
+/* ============================================================
+   SEARCH MODAL
+   ============================================================ */
+@media (max-width: 768px) {
+  .search-modal {
+    padding: calc(var(--navbar-height) + var(--safe-top) + 10px) max(12px, var(--safe-left)) calc(20px + var(--safe-bottom)) max(12px, var(--safe-right)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .search-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #search-input {
+    width: 100% !important;
+    font-size: 16px !important;
+    padding: 12px 44px 12px 44px !important;
+    box-sizing: border-box !important;
+  }
+
+  .search-results {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+@media (max-width: 768px) {
+  .footer {
+    padding: 30px 12px 20px !important;
+    margin-top: 30px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .footer-content {
+    padding: 0 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 20px !important;
+  }
+
+  .footer-links {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .footer-section {
+    margin: 0 !important;
+    min-width: auto !important;
+  }
+
+  .footer-section h3 {
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+  }
+
+  .footer-section a {
+    font-size: 0.85rem !important;
+  }
+
+  .social-icons {
+    justify-content: center !important;
+    gap: 12px !important;
+  }
+
+  .social-icons a {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ============================================================
+   MODALS - Full screen on mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .modal-content,
+  .share-modal-content {
+    width: 95% !important;
+    max-width: 95% !important;
+    margin: 10% auto !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  #share-modal .modal-content {
+    max-width: 95% !important;
+    padding: 20px !important;
+  }
+
+  .copy-link-container {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .copy-link-container input {
+    width: 100% !important;
+    font-size: 14px !important;
+  }
+
+  .share-options {
+    gap: 10px !important;
+  }
+
+  .share-options .social-icon {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* ============================================================
+   AUTH MODAL
+   ============================================================ */
+@media (max-width: 768px) {
+  #auth-modal .modal-content {
+    width: 95% !important;
+    max-width: 400px !important;
+    padding: 24px 20px !important;
+    margin: 15% auto !important;
+  }
+
+  .auth-form input {
+    font-size: 16px !important;
+    padding: 12px 14px !important;
+  }
+
+  .auth-form button {
+    font-size: 16px !important;
+    padding: 12px !important;
+  }
+}
+
+/* ============================================================
+   SCROLLBAR HIDE - Clean mobile look
+   ============================================================ */
+.list::-webkit-scrollbar,
+.nav-links::-webkit-scrollbar {
+  display: none !important;
+}
+
+.list,
+.nav-links {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* ============================================================
+   UNIVERSAL SAFE AREA INSETS - iOS App, PWA, Notch & Dynamic Island
+   ============================================================ */
+.navbar {
+  padding-left: max(12px, var(--safe-left)) !important;
+  padding-right: max(12px, var(--safe-right)) !important;
+}
+
+@media (min-width: 769px) {
+  .navbar {
+    padding-left: max(40px, var(--safe-left)) !important;
+    padding-right: max(40px, var(--safe-right)) !important;
+  }
+}
+
+/* iOS native app or devices with top safe area */
+@media (max-width: 768px) {
+  .navbar {
+    padding-top: var(--safe-top) !important;
+    height: calc(var(--navbar-height) + var(--safe-top)) !important;
+    min-height: calc(var(--navbar-height) + var(--safe-top)) !important;
+  }
+
+  .nav-links {
+    top: calc(var(--navbar-height) + var(--safe-top)) !important;
+  }
+}
+

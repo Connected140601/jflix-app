@@ -1,0 +1,107 @@
+/* Movie Categories Filter Styles */
+.movie-categories {
+  margin: 20px 0 40px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.category-filter {
+  text-align: center;
+}
+
+.category-filter h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.filter-buttons .filter-btn {
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-buttons .filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.filter-buttons .filter-btn.active {
+  background: var(--movies-color);
+  border-color: var(--movies-color);
+  color: #000;
+  font-weight: bold;
+}
+
+/* Genre-specific colors */
+.filter-buttons .filter-btn[data-category="action"]:hover,
+.filter-buttons .filter-btn[data-category="action"].active {
+  background: #e63946;
+  border-color: #e63946;
+}
+
+.filter-buttons .filter-btn[data-category="comedy"]:hover,
+.filter-buttons .filter-btn[data-category="comedy"].active {
+  background: #ffb703;
+  border-color: #ffb703;
+}
+
+.filter-buttons .filter-btn[data-category="drama"]:hover,
+.filter-buttons .filter-btn[data-category="drama"].active {
+  background: #8338ec;
+  border-color: #8338ec;
+}
+
+.filter-buttons .filter-btn[data-category="horror"]:hover,
+.filter-buttons .filter-btn[data-category="horror"].active {
+  background: #540b0e;
+  border-color: #540b0e;
+}
+
+.filter-buttons .filter-btn[data-category="scifi"]:hover,
+.filter-buttons .filter-btn[data-category="scifi"].active {
+  background: #3a86ff;
+  border-color: #3a86ff;
+}
+
+.filter-buttons .filter-btn[data-category="romance"]:hover,
+.filter-buttons .filter-btn[data-category="romance"].active {
+  background: #fb6f92;
+  border-color: #fb6f92;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .movie-categories {
+    padding: 15px;
+  }
+  
+  .filter-buttons .filter-btn {
+    padding: 6px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .filter-buttons .filter-btn {
+    width: 100%;
+  }
+}

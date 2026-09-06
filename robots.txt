@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jflix.uk/sitemap.xml
+
+# Disallow test and admin pages
+Disallow: /ads-test.html
+Disallow: /test.html
+Disallow: /test-copy.html
+Disallow: /test-anime-api.html
+Disallow: /minimal-test.html
+Disallow: /debug-test.html
+Disallow: /admin.html
+Disallow: /google25e1494b4a1944f6.html

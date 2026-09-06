@@ -1,0 +1,408 @@
+/* Card fix styles for the unified website */
+
+/* Fix for card hover effects */
+.media-card {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, z-index 0s 0.3s;
+  border-radius: 12px;
+}
+
+.media-card:hover,
+.media-card.card-touch-hover {
+  z-index: 10;
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(229, 9, 20, 0.25);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, z-index 0s;
+}
+
+/* Card Top Badges (Match Score & Category + Quality) */
+.card-top-badges {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.card-match-badge {
+  color: #46d369;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 2px 6px;
+  border-radius: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.card-top-badges-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.card-hd-badge {
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 1.5px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.trending-badge,
+.card-type-badge {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  margin: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.trending-badge:empty,
+.card-type-badge:empty {
+  display: none !important;
+}
+
+.trending-badge.movies,
+.card-type-badge.movies {
+  background: #e50914 !important;
+  color: #ffffff !important;
+}
+
+.trending-badge.tvshows,
+.card-type-badge.tvshows {
+  background: #0071eb !important;
+  color: #ffffff !important;
+}
+
+.trending-badge.anime,
+.card-type-badge.anime {
+  background: #7b68ee !important;
+  color: #ffffff !important;
+}
+
+.trending-badge.korean,
+.card-type-badge.korean {
+  background: #ff69b4 !important;
+  color: #ffffff !important;
+}
+
+/* Season & Episode Badge for TV Shows, Anime, Korean, Cartoons: positioned cleanly below Match badge */
+.season-badge {
+  position: absolute !important;
+  top: 32px !important;
+  left: 8px !important;
+  right: auto !important;
+  bottom: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(12, 12, 18, 0.85) !important;
+  color: #ffffff !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  z-index: 5 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+  pointer-events: none !important;
+  text-transform: uppercase !important;
+}
+
+.season-badge.completed {
+  background: rgba(46, 125, 50, 0.9) !important;
+  border-color: rgba(70, 211, 105, 0.65) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(46, 125, 50, 0.4) !important;
+}
+
+/* Fix for card & trending overlay: compact padding so all buttons fit cleanly without clipping */
+.card-overlay,
+.trending-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px 6px !important;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%) !important;
+  opacity: 0;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.media-card:hover .card-overlay,
+.media-card.card-touch-hover .card-overlay,
+.trending-item:hover .trending-overlay {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+/* Fix for card and trending buttons flex layout */
+.card-buttons,
+.trending-buttons {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.card-buttons .btn,
+.trending-buttons .btn {
+  margin: 0 !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+  height: 30px !important;
+  border-radius: 6px !important;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease !important;
+  pointer-events: auto !important;
+}
+
+/* Primary Watch Button */
+.card-buttons .watch-btn,
+.trending-buttons .watch-btn {
+  flex: 1.15 1 0% !important;
+  min-width: 0 !important;
+  padding: 0 4px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #e50914, #ff2d3d) !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.35) !important;
+}
+
+.card-buttons .watch-btn:hover,
+.trending-buttons .watch-btn:hover {
+  background: linear-gradient(135deg, #ff1a26, #ff4553) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.55) !important;
+}
+
+/* Details / Info Button */
+.card-buttons .details-btn,
+.trending-buttons .details-btn {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  padding: 0 4px !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  background: rgba(35, 35, 35, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.card-buttons .details-btn:hover,
+.trending-buttons .details-btn:hover {
+  background: rgba(60, 60, 60, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Watchlist / Watch Later Button */
+.card-buttons .watchlist-btn,
+.trending-buttons .watchlist-btn {
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.76rem !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.card-buttons .watchlist-btn:hover,
+.trending-buttons .watchlist-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: scale(1.08) !important;
+}
+
+.card-buttons .watchlist-btn.in-watchlist,
+.trending-buttons .watchlist-btn.in-watchlist {
+  background: rgba(70, 211, 105, 0.25) !important;
+  border-color: #46d369 !important;
+  color: #46d369 !important;
+}
+
+
+/* Fix for card info */
+.card-info {
+  padding: 10px 5px 5px;
+}
+
+/* Fix for card title overflow */
+.card-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Fix for card rating and year */
+.card-rating, .card-year {
+  display: flex;
+  align-items: center;
+  height: 18px;
+}
+
+/* Fix for list scrolling */
+.list {
+  padding: 20px 0;
+  margin: 0 -40px;
+  padding: 20px 40px;
+  position: relative;
+}
+
+/* Add scroll indicators */
+.list::before,
+.list::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.list::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(20, 20, 20, 1), rgba(20, 20, 20, 0));
+}
+
+.list::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(20, 20, 20, 1), rgba(20, 20, 20, 0));
+}
+
+.list:hover::before,
+.list:hover::after {
+  opacity: 1;
+}
+
+/* Fix for list with few items */
+.list.few-items {
+  justify-content: flex-start;
+}
+
+/* Media specific styling */
+.media-card.anime .card-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(123, 104, 238, 0.4) 70%,
+    rgba(123, 104, 238, 0.8) 100%
+  );
+}
+
+.media-card.korean .card-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(255, 105, 180, 0.4) 70%,
+    rgba(255, 105, 180, 0.8) 100%
+  );
+}
+
+.media-card.movies .card-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(229, 9, 20, 0.4) 70%,
+    rgba(229, 9, 20, 0.8) 100%
+  );
+}
+
+.media-card.tvshows .card-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 113, 235, 0.4) 70%,
+    rgba(0, 113, 235, 0.8) 100%
+  );
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .list {
+    margin: 0 -20px;
+    padding: 20px 20px;
+  }
+  
+  .card-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .card-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .list {
+    gap: 10px;
+  }
+  
+  .card-overlay {
+    padding-bottom: 10px;
+  }
+}

@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="description" content="Your JFlix profile. Manage your account, view your activity, and customize your preferences.">
+    <title>JFlix - User Profile</title>
+    
+    <link rel="stylesheet" href="css/tokens.css?v=1.0">
+    <link rel="stylesheet" href="css/motion.css?v=1.0">
+    <link rel="stylesheet" href="css/layout.css?v=1.0">
+    <link rel="stylesheet" href="css/animations.css?v=48.0">
+    <link rel="stylesheet" href="css/common.css?v=49.0">
+    <link rel="stylesheet" href="css/home.css?v=49.0">
+    <link rel="stylesheet" href="css/loader.css?v=50.0">
+    <link rel="stylesheet" href="css/responsive.css?v=48.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/loader.js?v=51.0"></script>
+    <script defer src="js/common.js?v=48.0"></script>
+    
+    <style>
+        /* Profile Page Styles - base (overridden by Enhanced styles below) */
+
+        /* Enhanced Responsive Styles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Premium Styles - Enhanced */
+        .premium-header {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(26, 26, 46, 0.95) 50%, rgba(255, 215, 0, 0.1) 100%) !important;
+            border: 2px solid rgba(255, 215, 0, 0.5) !important;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.2), 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-header::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.1) 50%, transparent 70%);
+            animation: premiumShimmer 6s infinite linear;
+        }
+
+        .premium-header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at top, rgba(255, 215, 0, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes premiumShimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(0%) translateY(0%) rotate(45deg); }
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%) !important;
+            color: #000 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3) !important;
+            animation: premiumPulse 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes premiumPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3); transform: scale(1); }
+            50% { box-shadow: 0 8px 30px rgba(255, 215, 0, 0.7), 0 0 0 3px rgba(255, 215, 0, 0.5); transform: scale(1.02); }
+        }
+
+        .premium-avatar {
+            border: 4px solid #FFD700 !important;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), inset 0 0 20px rgba(255, 215, 0, 0.2) !important;
+            animation: avatarGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes avatarGlow {
+            0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), inset 0 0 20px rgba(255, 215, 0, 0.2); }
+            50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 30px rgba(255, 215, 0, 0.3); }
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(26, 26, 46, 0.9) 50%, rgba(255, 215, 0, 0.05) 100%) !important;
+            border: 1px solid rgba(255, 215, 0, 0.4) !important;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .premium-icon {
+            color: #FFD700 !important;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+        }
+
+        /* Enhanced Voucher Section */
+        .voucher-section {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(26, 26, 46, 0.9) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.5), transparent);
+        }
+
+        .voucher-input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .voucher-input {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .voucher-input:focus {
+            outline: none;
+            border-color: #e50914;
+            box-shadow: 0 0 25px rgba(229, 9, 20, 0.4), inset 0 0 10px rgba(229, 9, 20, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .voucher-status {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .voucher-status.success {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2) 0%, rgba(39, 174, 96, 0.15) 100%);
+            color: #2ecc71;
+            display: block;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .voucher-status.error {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2) 0%, rgba(192, 57, 43, 0.15) 100%);
+            color: #e74c3c;
+            display: block;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        /* Enhanced Subscription Info */
+        .subscription-info {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(26, 26, 46, 0.95) 50%, rgba(255, 215, 0, 0.1) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+        }
+
+        .subscription-info.premium {
+            animation: premiumGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes premiumGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.05); }
+            50% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(255, 215, 0, 0.1); }
+        }
+
+        .subscription-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .subscription-title.premium {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .subscription-title.free {
+            color: #aaa;
+        }
+
+        .expiry-date {
+            color: #bbb;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Enhanced Profile Layout ── */
+        .profile-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 90px 20px 40px;
+        }
+
+        /* Cover banner behind header */
+        .profile-cover {
+            height: 160px;
+            background: linear-gradient(135deg, #1a0a0e 0%, #2d0a11 30%, #1a1a2e 70%, #0f0f23 100%);
+            border-radius: 20px 20px 0 0;
+            border: 1px solid rgba(229,9,20,0.15);
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-cover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 30px,
+                rgba(229,9,20,0.03) 30px,
+                rgba(229,9,20,0.03) 31px
+            );
+        }
+
+        .profile-cover::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e50914, transparent);
+        }
+
+        /* ── Profile Header ── */
+        .profile-header {
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 0 0 20px 20px;
+            padding: 0 36px 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-top: none;
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
+            position: relative;
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+            margin-top: -50px;
+        }
+
+        .profile-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(229, 9, 20, 0.6);
+            box-shadow: 0 8px 32px rgba(229, 9, 20, 0.3);
+            display: block;
+            background: #1a1a2e;
+        }
+
+        .profile-avatar-badge {
+            position: absolute;
+            bottom: 4px; right: 4px;
+            width: 22px; height: 22px;
+            background: #2ecc71;
+            border-radius: 50%;
+            border: 3px solid rgba(20,20,40,0.95);
+        }
+
+        .profile-info {
+            flex: 1;
+            padding-bottom: 4px;
+        }
+
+        .profile-info h1 {
+            color: #fff;
+            margin: 0 0 6px 0;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .profile-info .profile-email {
+            color: #777;
+            margin: 0 0 12px 0;
+            font-size: 14px;
+        }
+
+        .profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(229, 9, 20, 0.15);
+            color: #e50914;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(229,9,20,0.3);
+        }
+
+        .profile-header-actions {
+            display: flex;
+            gap: 10px;
+            padding-bottom: 4px;
+            flex-shrink: 0;
+        }
+
+        /* ── Profile Content Wrapper ── */
+        .profile-content-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── Stats Section ── */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(20, 20, 40, 0.9) 100%);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 16px;
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(229, 9, 20, 0.3);
+            border-color: rgba(229, 9, 20, 0.5);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(229, 9, 20, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e50914;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-number {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-text {
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Info Cards ── */
+        .info-card {
+            background: rgba(20, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .card-header i {
+            color: #e50914;
+            font-size: 18px;
+        }
+
+        .card-header h3 {
+            color: #fff;
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-desc {
+            color: #888;
+            font-size: 14px;
+            margin: 0 0 16px 0;
+        }
+
+        /* ── Subscription Badge ── */
+        .subscription-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .subscription-badge.free {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .subscription-badge.premium {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+        }
+
+        .subscription-desc {
+            color: #888;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* ── Voucher Card ── */
+        .voucher-card {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(20, 20, 40, 0.9) 100%);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+
+        .voucher-input-wrapper {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .voucher-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .voucher-input:focus {
+            outline: none;
+            border-color: #e50914;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .voucher-status {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .voucher-status.success {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2) 0%, rgba(39, 174, 96, 0.15) 100%);
+            color: #2ecc71;
+            display: block;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .voucher-status.error {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2) 0%, rgba(192, 57, 43, 0.15) 100%);
+            color: #e74c3c;
+            display: block;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        /* ── Account Details ── */
+        .account-details {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .account-item i {
+            color: #e50914;
+            width: 20px;
+            text-align: center;
+        }
+
+        .account-item span {
+            color: #ccc;
+        }
+
+        /* ── Form ── */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #999;
+            margin-bottom: 7px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 13px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.25s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e50914;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* ── Profile Grid (Legacy - kept for reference) ── */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .profile-main {
+            background: rgba(20, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-card {
+            background: rgba(20, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .profile-card h3 {
+            color: #fff;
+            margin: 0 0 18px 0;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-card h3 i {
+            color: #e50914;
+            font-size: 14px;
+        }
+
+        /* ── Section Header ── */
+        .section-title {
+            color: #fff;
+            margin: 0 0 22px 0;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .section-title i {
+            color: #e50914;
+        }
+
+        /* ── Form ── */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #999;
+            margin-bottom: 7px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 13px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.25s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(229,9,20,0.6);
+            background: rgba(0,0,0,0.4);
+            box-shadow: 0 0 0 3px rgba(229,9,20,0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 11px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(229,9,20,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.45);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 11px 22px;
+            border-radius: 11px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.2s;
+        }
+
+        .stat-item:hover {
+            background: rgba(229,9,20,0.08);
+            border-color: rgba(229,9,20,0.2);
+        }
+
+        .stat-value {
+            color: #e50914;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Activity ── */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(229, 9, 20, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e50914;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .activity-content p {
+            color: #ddd;
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .activity-content span {
+            color: #555;
+            font-size: 11px;
+        }
+
+        /* ── Not logged in ── */
+        .not-logged-in {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .not-logged-in i {
+            font-size: 72px;
+            color: rgba(229, 9, 20, 0.25);
+            margin-bottom: 20px;
+        }
+
+        .not-logged-in h2 {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .not-logged-in p {
+            color: #666;
+            margin-bottom: 28px;
+        }
+
+        /* ── Save status ── */
+        .save-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 14px;
+            font-size: 13px;
+        }
+
+        .save-status.success { color: #2ecc71; }
+        .save-status.error { color: #e50914; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-container { padding: 80px 14px 30px; }
+            .profile-cover { height: 120px; }
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0 20px 22px;
+                gap: 0;
+            }
+            .profile-avatar-wrap { margin-top: -45px; margin-bottom: 12px; }
+            .profile-avatar { width: 90px; height: 90px; }
+            .profile-info h1 { font-size: 22px; }
+            .profile-header-actions { width: 100%; margin-top: 12px; }
+            .profile-header-actions button { flex: 1; justify-content: center; }
+            
+            .profile-content-wrapper {
+                padding: 20px 14px 30px;
+            }
+            
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 20px 16px;
+            }
+            
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .info-card {
+                padding: 20px;
+            }
+            
+            .voucher-input-wrapper {
+                flex-direction: column;
+            }
+            
+            .voucher-input {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-container { padding: 70px 10px 20px; }
+            .profile-cover { height: 90px; border-radius: 14px 14px 0 0; }
+            .profile-header { padding: 0 14px 18px; border-radius: 0 0 14px 14px; }
+            .profile-avatar { width: 80px; height: 80px; }
+            .profile-info h1 { font-size: 20px; }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: 18px 16px;
+            }
+            
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .btn-primary { width: 100%; justify-content: center; }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn-primary, .btn-secondary { min-height: 48px; }
+            .voucher-input { min-height: 48px; }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        *:focus-visible {
+            outline: 2px solid #e50914;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader" class="loader-wrapper">
+        <div class="loader-inner">
+            <div class="loader-spinner-box">
+                <div class="loader"></div>
+                <div class="loader-core"></div>
+            </div>
+            <div class="loader-text">Loading Profile</div>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html" class="logo-link">
+                <div class="logo">
+                    <img src="images/logo.svg" alt="JFlix Logo">
+                </div>
+            </a>
+            <button class="hamburger-menu" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+                <span>Menu</span>
+            </button>
+        </div>
+        
+        <div class="navbar-center">
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="movies.html"><i class="fas fa-film"></i> Movies</a></li>
+                <li><a href="tvshows.html"><i class="fas fa-tv"></i> TV Shows</a></li>
+                <li><a href="anime.html"><i class="fas fa-dragon"></i> Anime</a></li>
+                <li><a href="korean.html"><i class="fas fa-heart"></i> Korean</a></li>
+            </ul>
+        </div>
+        
+        <div class="navbar-right">
+            <!-- Auth Buttons (shown when logged out) -->
+            <div class="auth-buttons" style="display: none;">
+                <button class="btn-secondary login-btn" style="margin-right: 10px;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
+            
+            <!-- User Menu (shown when logged in) -->
+            <div class="user-menu" style="display: none; align-items: center; gap: 15px;">
+                <a href="profile.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative;">
+                    <img src="" alt="User" class="user-avatar" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #e50914;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2235%22 height=%2235%22 viewBox=%220 0 35 35%22%3E%3Ccircle fill=%22%23666%22 cx=%2217.5%22 cy=%2217.5%22 r=%2217.5%22/%3E%3Ctext fill=%22%23fff%22 font-family=%22Arial%22 font-size=%2218%22 x=%2217.5%22 y=%2224%22 text-anchor=%22middle%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E';">
+                    <span id="header-profile-unread-badge" style="position:absolute;top:-4px;right:-4px;background:#e50914;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;">0</span>
+                    <span class="user-name" style="color: #fff; font-size: 14px;"></span>
+                </a>
+                <button class="logout-btn" style="background: none; border: none; color: #888; cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="profile-container">
+        <!-- Not Logged In State -->
+        <div id="not-logged-in" class="not-logged-in" style="display: none;">
+            <i class="fas fa-user-circle"></i>
+            <h2>Sign In Required</h2>
+            <p>Please sign in to view and manage your profile</p>
+            <button class="btn-primary login-btn" style="font-size: 16px; padding: 15px 40px;">
+                <i class="fas fa-sign-in-alt"></i> Sign In with Google
+            </button>
+        </div>
+
+        <!-- Logged In State -->
+        <div id="profile-content" style="display: none;">
+            <!-- Cover Banner -->
+            <div class="profile-cover" id="profile-cover"></div>
+
+            <!-- Profile Header -->
+            <div class="profile-header" id="profile-header">
+                <div class="profile-avatar-wrap">
+                    <img src="" alt="Profile" class="profile-avatar" id="profile-avatar">
+                    <div class="profile-avatar-badge"></div>
+                </div>
+                <div class="profile-info">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <h1 id="profile-name">Loading...</h1>
+                        <button id="message-admin-btn" onclick="openChatModal()" style="background:rgba(0,156,222,0.2);border:1px solid rgba(0,156,222,0.3);border-radius:6px;color:#009cde;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.2s;display:flex;align-items:center;gap:6px;" onmouseover="this.style.background='rgba(0,156,222,0.4)'" onmouseout="this.style.background='rgba(0,156,222,0.2)'">
+                            <i class="fas fa-comment"></i> Message Admin
+                        </button>
+                    </div>
+                    <p class="profile-email" id="profile-email">Loading...</p>
+                    <span class="profile-badge" id="profile-badge">
+                        <i class="fab fa-google"></i> Google Account
+                    </span>
+                </div>
+                <div class="profile-header-actions">
+                    <button class="logout-btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-content-wrapper">
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="stat-comments">0</div>
+                            <div class="stat-text">Comments</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="stat-reactions">0</div>
+                            <div class="stat-text">Reactions</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="stat-views">0</div>
+                            <div class="stat-text">Views</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="stat-joined">0</div>
+                            <div class="stat-text">Days Active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscription Card -->
+                <div id="subscription-card" class="info-card">
+                    <div class="card-header">
+                        <i class="fas fa-crown"></i>
+                        <h3>Subscription</h3>
+                    </div>
+                    <div id="subscription-content">
+                        <div class="subscription-badge free">
+                            <i class="fas fa-user"></i>
+                            <span>Free Member</span>
+                        </div>
+                        <p class="subscription-desc">Upgrade to Premium for exclusive benefits</p>
+                        <button id="get-premium-btn" onclick="openPremiumModal(true)" style="width:100%;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a0a00;border:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px;box-shadow:0 2px 10px rgba(255,180,0,.4);transition:all .2s;margin-top:12px;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 16px rgba(255,180,0,.6)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 2px 10px rgba(255,180,0,.4)';">
+                            <i class="fas fa-crown"></i> Get Premium
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Card -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <i class="fas fa-user-edit"></i>
+                        <h3>Edit Profile</h3>
+                    </div>
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" name="bio" placeholder="Tell us a bit about yourself..." maxlength="500"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" placeholder="City, Country">
+                        </div>
+                        <div style="display: flex; align-items: center; margin-top: 20px; gap: 12px;">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <span id="save-status" class="save-status" style="display: none;"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Voucher Section -->
+                <div class="info-card voucher-card" id="voucher-section" style="display: none;">
+                    <div class="card-header">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>Redeem Voucher</h3>
+                    </div>
+                    <p class="card-desc">Enter your code to unlock premium access</p>
+                    <div class="voucher-input-wrapper">
+                        <input type="text" id="voucher-input" class="voucher-input" placeholder="JFLIX..." maxlength="20">
+                        <button id="redeem-btn" class="btn-primary">
+                            <i class="fas fa-check"></i> Redeem
+                        </button>
+                    </div>
+                    <div id="voucher-status" class="voucher-status"></div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Account Info</h3>
+                    </div>
+                    <div class="account-details">
+                        <div class="account-item">
+                            <i class="fas fa-envelope"></i>
+                            <span id="account-email">-</span>
+                        </div>
+                        <div class="account-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Member since <span id="member-since">-</span></span>
+                        </div>
+                    </div>
+                    <button class="logout-btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/loader.js?v=48.0"></script>
+    <script src="js/navbar.js?v=48.0"></script>
+    <script src="js/auth.js?v=48.0"></script>
+    <script src="js/download-app-modal.js?v=48.0&cb=20260617"></script>
+    <script src="js/download-gate.js?v=48.0"></script>
+    
+    <script>
+        // Redirect to index and open profile modal
+        document.addEventListener('DOMContentLoaded', () => {
+            // Redirect to index.html
+            window.location.href = 'index.html';
+            
+            // After redirect, open profile modal
+            setTimeout(() => {
+                if (typeof openProfileModal === 'function') {
+                    openProfileModal();
+                }
+            }, 500);
+        });
+    </script>
+  <script src="js/social-share.js?v=48.0"></script>
+</body>
+</html>

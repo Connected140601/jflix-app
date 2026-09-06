@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>My Downloads - JFlix</title>
+<link rel="stylesheet" href="css/tokens.css?v=1.0">
+<link rel="stylesheet" href="css/downloads.css?v=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="downloads-page">
+  <div class="dl-topbar">
+    <div class="dl-topbar-inner">
+      <a href="index.html" class="dl-logo"><span class="dl-logo-j">J</span>Flix <span class="dl-sub">Downloads</span></a>
+      <div class="dl-top-actions">
+        <button class="dl-btn-ghost" id="dl-open-folder" title="Open downloads folder"><i class="fas fa-folder-open"></i> Open Folder</button>
+        <button class="dl-btn-ghost" id="dl-back" onclick="window.showLoader ? window.showLoader('Loading Home') : 0; location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dl-unsupported" id="dl-unsupported" style="display:none;">
+    <i class="fas fa-download"></i>
+    <h3>Downloads live inside the JFlix app</h3>
+    <p>Open this page from the <strong>JFlix Desktop</strong> or <strong>JFlix Android</strong> app to download episodes and movies and watch them offline.</p>
+  </div>
+
+  <main class="dl-main" id="dl-main">
+    <h1 class="dl-heading"><i class="fas fa-download"></i> My Downloads</h1>
+
+    <section class="dl-section" id="dl-active-section">
+      <h2 class="dl-section-title">Active</h2>
+      <div class="dl-list" id="dl-active-list"></div>
+    </section>
+
+    <section class="dl-section" id="dl-saved-section">
+      <h2 class="dl-section-title">
+        Saved
+        <button class="dl-btn-ghost dl-clear" id="dl-clear-completed" style="display:none;">Clear completed</button>
+      </h2>
+      <div class="dl-list" id="dl-saved-list"></div>
+    </section>
+
+    <div class="dl-empty" id="dl-empty" style="display:none;">
+      <i class="fas fa-box-open"></i>
+      <p>Nothing downloaded yet.</p>
+      <p class="dl-empty-sub">Open any movie or episode in the player and tap <strong>Download</strong> — the file is saved privately inside the app.</p>
+    </div>
+  </main>
+
+  <!-- Offline player modal -->
+  <div class="dl-player-overlay" id="dl-player-overlay" style="display:none;" onclick="if(event.target===this)closeDlPlayer()">
+    <div class="dl-player-box">
+      <div class="dl-player-head">
+        <span id="dl-player-title">Now Playing</span>
+        <button class="dl-close" onclick="closeDlPlayer()">&times;</button>
+      </div>
+      <video id="dl-video" controls autoplay playsinline></video>
+    </div>
+  </div>
+
+<script src="js/loader.js?v=51.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script src="js/android-downloads.js?v=1.0"></script>
+<script src="js/ios-downloads.js?v=1.0"></script>
+<script src="js/downloads.js?v=1.1"></script>
+</body>
+</html>

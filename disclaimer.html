@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+  <meta charset="UTF-8" />
+  
+  <!-- Favicon and PWA Icons - Consistent Across All Platforms -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512x512.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Disclaimer - JFlix</title>
+
+  <!-- Hide ads in Android WebView -->
+  <script>
+    (function() {
+      var ua = navigator.userAgent;
+      var isAndroidWebView = /Android/.test(ua) && /wv/.test(ua);
+      if (isAndroidWebView) {
+        var style = document.createElement('style');
+        style.textContent = '.ad-desktop, .ad-mobile, .ad-mobile-only, .search-ad-left, .ad-sidebar { display: none !important; }';
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/tokens.css?v=1.0">
+  <link rel="stylesheet" href="css/motion.css?v=1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.0">
+  <link rel="stylesheet" href="css/animations.css?v=48.0">
+  <link rel="stylesheet" href="css/home.css?v=49.0">
+  <link rel="stylesheet" href="css/common.css?v=49.0">
+  <link rel="stylesheet" href="css/legal.css?v=49.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js?v=48.0"></script>
+  <script src="js/loader.js?v=51.0"></script>
+  <script defer src="js/common.js?v=48.0"></script>
+  <script defer src="js/navbar.js?v=48.0"></script>
+  <link rel="stylesheet" href="css/loader.css?v=50.0">
+  <link rel="stylesheet" href="css/responsive.css?v=48.0">
+</head>
+<body>
+  <div id="loader" class="loader-wrapper">
+    <div class="loader-inner">
+      <div class="loader-spinner-box">
+        <div class="loader"></div>
+        <div class="loader-core"></div>
+      </div>
+      <div class="loader-text">Loading Disclaimer</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+  <div class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="images/logo.svg" alt="JFlix Logo">
+        </div>
+      </a>
+      <button class="hamburger-menu" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+      </button>
+    </div>
+    <div class="navbar-right">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html" class="movies">Movies</a>
+        <a href="tvshows.html" class="tvshows">TV Shows</a>
+        <a href="anime.html" class="anime">Anime</a>
+        <a href="korean.html" class="korean">Korean TV</a>
+        <a href="cartoon.html" class="cartoon">Cartoons</a>
+        <a href="index.html?open_search=true" class="search-nav-link"><i class="fas fa-search"></i> Search</a>
+      </div>
+      <!-- Auth Buttons (shown when logged out) -->
+      <div class="auth-buttons" style="display: none; margin-left: 15px;">
+        <button class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </div>
+      <!-- User Menu (shown when logged in) -->
+      <div class="user-menu" style="display: none; margin-left: 15px;">
+        <a href="profile.html" data-no-loader style="display: flex; align-items: center; gap: 8px; text-decoration: none; position: relative;" title="Profile" aria-label="Profile">
+          <img src="" alt="User" class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #e50914;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Ccircle fill=%22%23666%22 cx=%2216%22 cy=%2216%22 r=%2216%22/%3E%3Ctext fill=%22%23fff%22 font-family=%22Arial%22 font-size=%2216%22 x=%2216%22 y=%2222%22 text-anchor=%22middle%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E';">
+          <span id="header-profile-unread-badge" style="position:absolute;top:-4px;right:-4px;background:#e50914;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;">0</span>
+          <span class="user-name" style="color: #fff; font-size: 13px; font-weight: 500;"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal-container">
+    <div class="legal-header">
+      <h1>Disclaimer</h1>
+      <p>Last Updated: July 17, 2026</p>
+    </div>
+
+    <div class="legal-content">
+      <section class="notice-box" style="background: rgba(229,9,20,0.08); border-left: 4px solid var(--primary-color); padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
+        <p style="margin: 0; font-weight: 500;"><i class="fas fa-exclamation-circle" style="color: var(--primary-color); margin-right: 8px;"></i> JFlix does not host, upload, store, or otherwise reproduce any video, audio, or media files on its servers. This website operates solely as an index and search interface that links to and embeds content that is publicly available on third-party websites and services. We have no control over the content hosted on those third-party servers.</p>
+      </section>
+
+      <section>
+        <h2>1. General Disclaimer</h2>
+        <p>The information provided on JFlix is for general informational and entertainment purposes only. All content on this website is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the website.</p>
+      </section>
+
+      <section>
+        <h2>2. Third-Party Content Disclaimer</h2>
+        <p>JFlix does not host, store, or upload any videos, media files, or content on its servers. All content accessible through our platform is hosted on and streamed from third-party servers and websites over which we have no control.</p>
+        <p>The content available through JFlix is provided by third-party sources and is the property of their respective owners. We do not claim ownership of any content displayed on our platform. JFlix merely acts as a search engine and content aggregator that provides links to publicly available content from various third-party sources.</p>
+        <p>We have no control over the nature, content, and availability of those third-party websites and services. The inclusion of any links or embedded content does not necessarily imply a recommendation or endorsement of the views expressed within them.</p>
+      </section>
+
+      <section>
+        <h2>3. Copyright and Intellectual Property</h2>
+        <p>All trademarks, logos, and service marks displayed on JFlix are the property of their respective owners. We acknowledge and respect the intellectual property rights of others.</p>
+        <p>If you believe that any content accessible on or from JFlix infringes your copyright or other intellectual property rights, please refer to our DMCA policy and contact us immediately.</p>
+      </section>
+
+      <section>
+        <h2>4. No Responsibility Disclaimer</h2>
+        <p>In no event shall JFlix be liable for any special, direct, indirect, consequential, or incidental damages or any damages whatsoever, whether in an action of contract, negligence, or other tort, arising out of or in connection with the use of the service or the contents of the service.</p>
+        <p>JFlix does not warrant that the website is free of viruses or other harmful components. We shall not be liable for any loss or damage of any kind incurred as a result of the use of any content posted, emailed, transmitted, or otherwise made available via JFlix.</p>
+      </section>
+
+      <section>
+        <h2>5. "Use at Your Own Risk" Disclaimer</h2>
+        <p>All information on this website is provided "as is," with no guarantee of completeness, accuracy, timeliness, or the results obtained from the use of this information. You use JFlix and its content entirely at your own risk.</p>
+        <p>It is the user's responsibility to ensure that their use of content accessible through JFlix complies with all applicable copyright laws and regulations in their jurisdiction.</p>
+      </section>
+
+      <section>
+        <h2>6. Fair Use Disclaimer</h2>
+        <p>JFlix may use copyrighted material which has not always been specifically authorized by the copyright owner. We are making such material available for criticism, comment, news reporting, teaching, scholarship, or research.</p>
+        <p>We believe this constitutes a "fair use" of any such copyrighted material as provided for in section 107 of the United States Copyright Law. If you wish to use copyrighted material from this site for purposes of your own that go beyond fair use, you must obtain permission from the copyright owner.</p>
+      </section>
+
+      <section>
+        <h2>7. Contact Information</h2>
+        <p>If you have any questions about this Disclaimer, please contact us at legal@jflix.example.com.</p>
+      </section>
+    </div>
+  </div>
+  <!-- Ad Section 1 - Legal Page Header -->
+  <div class="ad-section ad-legal-page-header" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Leaderboard Ad (728x90) - Desktop -->
+    <div class="ad-desktop" style="display: inline-block;">
+      <script>
+        atOptions = {
+          'key' : 'a3497336bfd1bd0d9eb6314a119b322d',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      </script>
+      <script src="https://heavinessslight.com/a3497336bfd1bd0d9eb6314a119b322d/invoke.js"></script>
+    </div>
+    <!-- Mobile Banner Ad (320x50) - Mobile -->
+    <div class="ad-mobile" style="display: none;">
+      <script>
+        atOptions = {
+          'key' : '3d2cdb24291c0ef1776d8e5f8b73b5f7',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      </script>
+      <script src="https://heavinessslight.com/3d2cdb24291c0ef1776d8e5f8b73b5f7/invoke.js"></script>
+    </div>
+  </div>
+
+  <!-- Ad Section 2 - Legal Page Middle -->
+  <div class="ad-section ad-legal-page-middle" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Vertical Banner Ad (160x300) -->
+    <script>
+      atOptions = {
+        'key' : '985241e815704103478c2ec28530d20a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script src="https://heavinessslight.com/985241e815704103478c2ec28530d20a/invoke.js"></script>
+  </div>
+
+  <!-- Ad Section 3 - Legal Page Bottom -->
+<div class="ad-section ad-legal-page-bottom" style="text-align: center; margin: 30px 0; padding: 15px;">
+  <!-- Removed - below-fold ad for better Adsterra compliance -->
+</div>
+
+  <!-- Ad Section 4 - Before Footer -->
+  <div class="ad-section ad-before-footer" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Removed - below-fold ad for better Adsterra compliance -->
+  </div>
+
+</div>
+
+<div id="footer-placeholder"></div>
+    <script src="js/footer-loader.js?v=48.0"></script>
+  <script src="js/social-share.js?v=48.0"></script>
+  <script src="js/adblock-handler.js?v=48.0"></script>
+</body>
+</html>
+
+

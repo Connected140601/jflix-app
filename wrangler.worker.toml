@@ -1,0 +1,25 @@
+name = "jflix-api"
+main = "worker.js"
+compatibility_date = "2024-04-18"
+
+# D1 Database configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "jflix-db"
+database_id = "c86f9e76-1195-4887-b9b6-321dffc9f062"
+
+# R2 Bucket configuration for image uploads
+[[r2_buckets]]
+binding = "CHAT_IMAGES"
+bucket_name = "jlearn-downloads"
+
+# Environment variables
+[vars]
+R2_PUBLIC_URL = "https://pub-b130939c6152471b95caa7a5f5b04782.r2.dev"
+API_URL = "https://jflix-api.junrel-sapantaicloud.workers.dev/api"
+
+# Cron triggers:
+# - 9:00 AM UTC: daily newsletter batch (20 emails)
+# - Every 6 hours: check for new movies/TV from TMDB and auto-send push notifications
+[triggers]
+crons = ["0 9 * * *", "0 */6 * * *"]

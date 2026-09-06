@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JFlix Ad-Free Player (Preview)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      min-height: 100vh;
+    }
+    .top-bar {
+      width: 100%; padding: 12px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .top-bar .badge {
+      background: #e50914; color: #fff; padding: 4px 10px;
+      border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    }
+    .top-bar h1 { font-size: 16px; font-weight: 600; }
+    .top-bar .preview-tag {
+      margin-left: auto; background: rgba(255,215,0,0.15); color: #FFD700;
+      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    }
+    .top-bar .back-btn {
+      background: rgba(255,255,255,0.1); color: #fff; border: none;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; text-decoration: none;
+    }
+    .video-area { width: 100%; max-width: 1200px; margin: 16px auto; padding: 0 16px; }
+    .video-wrapper {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background: #000; border-radius: 12px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    video { width: 100%; height: 100%; object-fit: contain; }
+    .loading-overlay {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; background: #000; z-index: 20;
+    }
+    .loading-overlay.hidden { display: none; }
+    .loading-overlay i { font-size: 48px; color: #e50914; margin-bottom: 16px; }
+    .loading-overlay p { font-size: 14px; color: #aaa; }
+    .error-overlay {
+      position: absolute; inset: 0; display: none; flex-direction: column;
+      align-items: center; justify-content: center; background: rgba(0,0,0,0.9);
+      z-index: 20; padding: 20px; text-align: center;
+    }
+    .error-overlay.show { display: flex; }
+    .error-overlay i { font-size: 48px; color: #e50914; margin-bottom: 16px; }
+    .error-overlay h3 { font-size: 18px; margin-bottom: 8px; }
+    .error-overlay p { font-size: 14px; color: #aaa; max-width: 400px; line-height: 1.5; margin-bottom: 16px; }
+    .info-panel { width: 100%; max-width: 1200px; margin: 0 auto 20px; padding: 0 16px; }
+    .info-card {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 16px; margin-bottom: 12px;
+    }
+    .info-card h2 { font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .info-card p { font-size: 13px; color: #aaa; line-height: 1.5; }
+    .quality-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .quality-btn {
+      padding: 8px 16px; border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05); color: #fff; border-radius: 8px;
+      cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.25s ease;
+    }
+    .quality-btn:hover { border-color: #50c878; background: rgba(80,200,120,0.1); }
+    .quality-btn.active { border-color: #50c878; background: rgba(80,200,120,0.2); color: #50c878; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+    .stat { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; text-align: center; }
+    .stat .label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat .value { font-size: 15px; font-weight: 600; color: #50c878; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: #e50914; color: #fff; text-decoration: none; display: inline-block; }
+    @media (max-width: 768px) {
+      .top-bar h1 { font-size: 13px; }
+      .info-card { padding: 12px; }
+      .quality-btn { font-size: 11px; padding: 6px 12px; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="badge">JFlix</span>
+  <h1>Ad-Free HLS Player <span style="color:#50c878;font-size:12px;">(No Ads)</span></h1>
+  <span class="preview-tag">PREVIEW</span>
+  <a class="back-btn" href="player.html" id="back-btn">Back to Regular Player</a>
+</div>
+
+<div class="video-area">
+  <div class="video-wrapper">
+    <video id="video" controls allowfullscreen webkit-playsinline playsinline referrerpolicy="no-referrer"></video>
+    <div class="loading-overlay" id="loading">
+      <i class="fas fa-circle-notch fa-spin"></i>
+      <p id="loading-text">Extracting ad-free stream...</p>
+    </div>
+    <div class="error-overlay" id="error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Stream Unavailable</h3>
+      <p id="error-msg">Could not extract a direct stream URL.</p>
+      <a class="btn btn-primary" href="player.html" id="error-back">Back to Regular Player</a>
+    </div>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div class="info-card">
+    <h2><i class="fas fa-shield-alt" style="color:#50c878;"></i> Ad-Free HLS Player</h2>
+    <p>Extracts direct stream URLs from VidLink.pro using XSalsa20-Poly1305 decryption. Video plays directly from the CDN in a custom HTML5 player with <code>referrerpolicy="no-referrer"</code> — no iframe, no embed, no ads, no popunders, no proxy bandwidth cost.</p>
+    <div class="quality-selector" id="quality-selector"></div>
+  </div>
+  <div class="info-card">
+    <h2><i class="fas fa-info-circle" style="color:#4a90e2;"></i> Stream Info</h2>
+    <div class="stats">
+      <div class="stat"><div class="label">Status</div><div class="value" id="stat-status">Loading</div></div>
+      <div class="stat"><div class="label">Quality</div><div class="value" id="stat-quality">-</div></div>
+      <div class="stat"><div class="label">Source</div><div class="value" id="stat-source" style="font-size:12px;">VidLink.pro</div></div>
+      <div class="stat"><div class="label">Ads</div><div class="value">ZERO</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const loading = document.getElementById('loading');
+const loadingText = document.getElementById('loading-text');
+const error = document.getElementById('error');
+const errorMsg = document.getElementById('error-msg');
+const qualitySelector = document.getElementById('quality-selector');
+
+const params = new URLSearchParams(window.location.search);
+const mediaId = params.get('id');
+const mediaType = params.get('type') || 'movie';
+const season = params.get('season');
+const episode = params.get('episode');
+
+document.getElementById('back-btn').href = 'player.html' + window.location.search;
+document.getElementById('error-back').href = 'player.html' + window.location.search;
+
+let hls = null;
+let currentStreams = [];
+
+if (!mediaId) {
+  showError('Missing movie ID. Usage: player-clean.html?id=550&type=movie');
+} else {
+  loadStream();
+}
+
+async function loadStream() {
+  loading.classList.remove('hidden');
+  error.classList.remove('show');
+  loadingText.textContent = 'Extracting ad-free stream...';
+
+  // Extraction happens via our own Cloudflare Pages Function (fast, no
+  // bandwidth cost — it's just a small JSON API call to VidLink.pro).
+  // Playback then goes DIRECTLY from the browser to the video CDN with
+  // referrerpolicy="no-referrer" on the <video> tag, so no proxy/relay is
+  // needed for the actual video bytes at all.
+  let apiUrl = `/api/hls-stream?id=${mediaId}&type=${mediaType}`;
+  if (mediaType === 'tv') {
+    apiUrl += `&season=${season || 1}&episode=${episode || 1}`;
+  }
+
+  const timeoutTimer = setTimeout(() => {
+    showError('Extraction timed out. Please try again.');
+  }, 15000);
+
+  try {
+    const resp = await fetch(apiUrl);
+    const data = await resp.json();
+    clearTimeout(timeoutTimer);
+
+    if (!data.success || data.streams.length === 0) {
+      showError('No direct stream URLs found. ' + (data.error || ''));
+      return;
+    }
+
+    // Sort lowest -> highest quality
+    currentStreams = data.streams
+      .slice()
+      .sort((a, b) => (parseInt(a.quality) || 0) - (parseInt(b.quality) || 0));
+
+    document.getElementById('stat-status').textContent = 'Ready';
+    document.getElementById('stat-source').textContent = 'VidLink.pro (direct)';
+
+    qualitySelector.innerHTML = '';
+    currentStreams.forEach((stream, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quality-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = stream.label || stream.quality || `Server ${i+1}`;
+      btn.onclick = () => playStream(stream, btn);
+      qualitySelector.appendChild(btn);
+    });
+
+    // Auto-play the LOWEST quality first for the fastest start — these are
+    // direct progressive MP4s (not chunked HLS), so a 720p/500MB file takes
+    // much longer to buffer than a 360p file. Users can switch up afterward.
+    playStream(currentStreams[0], qualitySelector.children[0]);
+
+  } catch (err) {
+    clearTimeout(timeoutTimer);
+    showError('Failed to extract stream: ' + err.message);
+  }
+}
+
+function playStream(stream, btn) {
+  document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('stat-quality').textContent = stream.label || stream.quality || 'Auto';
+
+  if (hls) { hls.destroy(); hls = null; }
+  loading.classList.remove('hidden');
+  loadingText.textContent = `Loading ${stream.label || stream.quality}...`;
+
+  const stallTimer = setTimeout(() => {
+    loadingText.textContent = `Still buffering ${stream.label || stream.quality}... try a lower quality if this continues.`;
+  }, 8000);
+
+  // Direct CDN URL — video tag has referrerpolicy="no-referrer" set in HTML,
+  // which is required because the CDN blocks any request carrying a Referer.
+  const url = stream.url;
+
+  if (stream.type === 'hls' && window.Hls && Hls.isSupported()) {
+    hls = new Hls({ maxBufferLength: 30, xhrSetup: (xhr) => { xhr.setRequestHeader = () => {}; } });
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      clearTimeout(stallTimer);
+      loading.classList.add('hidden');
+      video.play().catch(() => {});
+    });
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      if (data.fatal) {
+        clearTimeout(stallTimer);
+        showError('Playback error: ' + data.details);
+      }
+    });
+  } else {
+    video.src = url;
+    video.load();
+    video.oncanplay = () => {
+      clearTimeout(stallTimer);
+      loading.classList.add('hidden');
+      video.play().catch(() => {});
+    };
+    video.onerror = () => {
+      clearTimeout(stallTimer);
+      showError('Failed to load video. Stream may be expired. Try another quality.');
+    };
+  }
+}
+
+function showError(msg) {
+  loading.classList.add('hidden');
+  error.classList.add('show');
+  errorMsg.textContent = msg;
+}
+</script>
+
+</body>
+</html>

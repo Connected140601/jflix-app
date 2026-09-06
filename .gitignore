@@ -1,0 +1,12 @@
+application/dist/
+application/node_modules/
+.DS_Store
+*.bak
+*.backup
+node_modules
+dist/
+android-app/
+android supa/
+electron-admin/
+.wrangler/
+.freebuff/

@@ -1,0 +1,56 @@
+# Exclude large build artifacts
+*.pkg
+*.dmg
+*.exe
+*.msi
+*.zip
+*.tar.gz
+*.tar
+
+# Exclude dist folder (contains large build artifacts)
+dist/
+
+# Exclude non-web projects (note: aniu/ IS deployed — it is the live ANIU site)
+android-app/
+android supa/
+electron-admin/
+electron/
+ios-app/
+
+# Exclude database migration and sql files
+*.sql
+
+# Exclude copied project folders
+JFlix copy 8-1 copy 36/
+
+# Exclude node_modules
+node_modules/
+
+# Exclude .git
+.git/
+
+# Exclude IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Exclude OS files
+.DS_Store
+Thumbs.db
+
+# Exclude logs
+*.log
+.wrangler/
+
+# Exclude test files
+*.test.js
+*.spec.js
+__tests__/
+coverage/
+
+# Exclude temporary files
+tmp/
+temp/
+*.tmp

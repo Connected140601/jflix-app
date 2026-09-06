@@ -1,0 +1,637 @@
+/* Home page styles for the unified website */
+
+/* Banner */
+.banner {
+  position: relative;
+  min-height: 82vh;
+  background-size: cover;
+  background-position: center 25%;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: flex-end;
+  padding-top: var(--navbar-height, 68px);
+  overflow: hidden;
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 13, 0.1) 0%,
+    rgba(8, 8, 13, 0.4) 40%,
+    rgba(8, 8, 13, 0.88) 85%,
+    var(--bg-0, #08080d) 100%
+  ),
+  linear-gradient(
+    to right,
+    rgba(8, 8, 13, 0.95) 0%,
+    rgba(8, 8, 13, 0.7) 45%,
+    rgba(8, 8, 13, 0.1) 85%
+  );
+  pointer-events: none;
+}
+
+.banner-content {
+  position: relative;
+  padding: 48px;
+  max-width: 750px;
+  width: 100%;
+  z-index: 2;
+  animation: bannerFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bannerFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.banner-content h1 {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-content p {
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  color: var(--text-1, #c4c5d6);
+  max-width: 620px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.banner-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.banner-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-right: 10px;
+  text-transform: uppercase;
+}
+
+.banner-badge.new {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.banner-badge.ongoing {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.banner-badge.top-rated {
+  background-color: #FFD700;
+  color: black;
+}
+
+.banner-badge.anime {
+  background-color: var(--anime-color);
+  color: white;
+}
+
+.banner-badge.korean {
+  background-color: var(--korean-color);
+  color: white;
+}
+
+.banner-badge.movies {
+  background-color: var(--movies-color);
+  color: white;
+}
+
+.banner-badge.tvshows {
+  background-color: var(--tvshows-color);
+  color: white;
+}
+
+/* Content Container */
+.content-container {
+  padding: 0 40px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Row */
+.row {
+  margin-bottom: 40px;
+}
+
+.row h2 {
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.row h2 .category-icon {
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+
+.row h2 .category-badge {
+  margin-left: 10px;
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.anime-badge {
+  background-color: var(--anime-color);
+}
+
+.korean-badge {
+  background-color: var(--korean-color);
+}
+
+.movies-badge {
+  background-color: var(--movies-color);
+}
+
+.tvshows-badge {
+  background-color: var(--tvshows-color);
+}
+
+/* Media List */
+.list {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Season/Episode Badge */
+.trending-poster-container {
+  position: relative;
+}
+
+.season-badge {
+  position: absolute;
+  top: 32px;
+  left: 8px;
+  background: rgba(12, 12, 18, 0.85);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: nowrap;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.season-badge.completed {
+  background: rgba(46, 125, 50, 0.9);
+  border-color: rgba(70, 211, 105, 0.65);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(46, 125, 50, 0.4);
+}
+
+/* Trending Section Responsive */
+@media (max-width: 768px) {
+  .trending-grid {
+    /* This ensures the grid is responsive on smaller screens 
+       without shrinking the cards below their original size. */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px; /* Adjust gap for smaller screens */
+  }
+
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .section-header p {
+    font-size: 1rem;
+  }
+
+  .banner-content {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .banner-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .banner-content p {
+    font-size: 1rem;
+  }
+}
+
+/* Media Card */
+.media-card {
+  min-width: 180px;
+  width: 180px;
+  transition: transform var(--transition-speed);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.media-card:hover {
+  transform: scale(1.05);
+}
+
+.card-poster-container {
+  position: relative;
+  height: 270px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.media-card:hover .card-poster {
+  transform: scale(1.1);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-speed);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 15px;
+}
+
+.media-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.card-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.card-buttons .btn {
+  flex-grow: 1;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+}
+
+.card-info {
+  padding: 10px 5px;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-rating {
+  color: #FFD700;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+.card-year {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.card-type-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.card-type-badge.anime {
+  background-color: var(--anime-color);
+}
+
+.card-type-badge.korean {
+  background-color: var(--korean-color);
+}
+
+.card-type-badge.movies {
+  background-color: var(--movies-color);
+}
+
+.card-type-badge.tvshows {
+  background-color: var(--tvshows-color);
+}
+
+/* Modal */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+}
+
+#modal-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.modal-text {
+  padding: 20px;
+}
+
+#modal-title {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.modal-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  color: var(--text-secondary);
+}
+
+.separator {
+  margin: 0 10px;
+}
+
+#modal-rating {
+  color: #FFD700;
+}
+
+#modal-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.genre {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+#modal-description {
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .modal-body {
+    flex-direction: row;
+  }
+  
+  #modal-image {
+    width: 40%;
+    height: auto;
+  }
+  
+  .modal-text {
+    width: 60%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .banner-content {
+    width: 60%;
+  }
+  .quick-access-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .banner {
+    height: 70vh;
+  }
+  .banner-content {
+    width: 70%;
+    padding: 30px;
+  }
+  .banner-content h1 {
+    font-size: 2.5rem;
+  }
+  .banner-content p {
+    font-size: 1rem;
+    max-width: 500px;
+  }
+  .content-container {
+    padding: 0 30px;
+  }
+  .row h2 {
+    font-size: 1.3rem;
+  }
+  .quick-access-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  .media-card {
+    min-width: 160px;
+    width: 160px;
+  }
+  .card-poster-container {
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    height: 50vh;
+    align-items: center;
+  }
+  .banner::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(20, 20, 20, 0) 0%,
+      rgba(20, 20, 20, 0.6) 60%,
+      rgba(20, 20, 20, 1) 100%
+    );
+  }
+  .banner-content {
+    width: 90%;
+    padding: 20px;
+    text-align: center;
+  }
+  .banner-content h1 {
+    font-size: 2rem;
+    justify-content: center;
+  }
+  .banner-content p {
+    font-size: 0.9rem;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .banner-buttons {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+  .banner-buttons .btn {
+    width: 80%;
+    max-width: 250px;
+  }
+
+  .content-container {
+    padding: 0;
+  }
+  .row h2 {
+    font-size: 1.2rem;
+  }
+  .list {
+    gap: 10px;
+  }
+  .media-card {
+    min-width: 140px;
+    width: 140px;
+  }
+  .card-poster-container {
+    height: 210px;
+  }
+  .card-title {
+    font-size: 0.9rem;
+  }
+  .card-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card-buttons .btn {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  .quick-access-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  .quick-access-item span {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .banner {
+    height: 40vh;
+  }
+  .banner-content h1 {
+    font-size: 1.8rem;
+  }
+  .banner-content p {
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+  }
+  .banner-buttons .btn {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+
+  .content-container {
+    padding: 0;
+  }
+  .row h2 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .media-card {
+    min-width: 120px;
+    width: 120px;
+  }
+  .card-poster-container {
+    height: 180px;
+  }
+  .card-info {
+    padding: 8px;
+  }
+  .card-title {
+    font-size: 0.85rem;
+  }
+  .card-meta {
+    font-size: 0.75rem;
+  }
+  .card-buttons .btn {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quick-access-item i {
+    font-size: 1.5rem;
+  }
+  .quick-access-item span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 380px) {
+    .media-card {
+        min-width: 100px;
+        width: 100px;
+    }
+    .card-poster-container {
+        height: 150px;
+    }
+    .banner-content h1 {
+        font-size: 1.6rem;
+    }
+    .banner-content p {
+        display: none;
+    }
+    .banner-buttons .btn {
+        width: 90%;
+    }
+}

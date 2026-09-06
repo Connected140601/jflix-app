@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+<script src="../js/exit-confirmation.js?v=49.0"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Watch anime details and stream episodes for free on ANIU by JFlix. View synopsis, genres, score, and start watching instantly.">
+    <meta name="keywords" content="anime details, watch anime free, ANIU, JFlix anime, anime synopsis, anime episodes, stream anime">
+    <link rel="canonical" href="https://jflix.uk/aniu/anime.html">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#141414">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jflix.uk/aniu/anime.html">
+    <meta property="og:title" content="Anime Details | ANIU by JFlix">
+    <meta property="og:description" content="Watch anime details and stream episodes for free on ANIU by JFlix. View synopsis, genres, score, and start watching instantly.">
+    <meta property="og:image" content="https://jflix.uk/images/logo.svg">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://jflix.uk/aniu/anime.html">
+    <meta property="twitter:title" content="Anime Details | ANIU by JFlix">
+    <meta property="twitter:description" content="Watch anime details and stream episodes for free on ANIU by JFlix. View synopsis, genres, score, and start watching instantly.">
+    <meta property="twitter:image" content="https://jflix.uk/images/logo.svg">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/images/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Anime Details | ANIU by JFlix</title>
+    <link rel="stylesheet" href="css/style.css?v=50.0">
+    <link rel="stylesheet" href="css/floating-button.css?v=48.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.svg" alt="ANIU" height="36">
+                <span class="logo-tagline">Kiss it Real</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="index.html#trending" class="nav-link">Trending</a>
+                <a href="index.html#popular" class="nav-link">Popular</a>
+                <a href="index.html#recent" class="nav-link">Latest</a>
+                <a href="index.html#movies" class="nav-link">Movies</a>
+            </div>
+            <div class="nav-right">
+                <button class="search-icon-btn" id="searchToggle" aria-label="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Full Screen Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-overlay-header">
+            <div class="search-overlay-input-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Type 3+ letters to search anime..." autocomplete="off">
+            </div>
+            <button class="search-close-btn" id="searchClose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="search-hint" id="searchHint">Start typing to search across all anime titles…</div>
+        <div class="search-live-results" id="searchResults"></div>
+    </div>
+
+    <main class="main-content">
+        <div class="anime-detail" id="animeDetail">
+            <div class="loading">Loading...</div>
+        </div>
+    </main>
+
+    <script src="js/search.js?v=48.0"></script>
+    <script src="js/anime.js?v=48.0"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlayInput = document.getElementById('searchInput');
+            const overlayResults = document.getElementById('searchResults');
+            const searchHint = document.getElementById('searchHint');
+            const searchToggle = document.getElementById('searchToggle');
+            const searchClose = document.getElementById('searchClose');
+            const searchOverlay = document.getElementById('searchOverlay');
+
+            // Open search overlay
+            if (searchToggle && searchOverlay) {
+                searchToggle.addEventListener('click', () => {
+                    searchOverlay.classList.add('active');
+                    if (overlayInput) {
+                        setTimeout(() => overlayInput.focus(), 100);
+                    }
+                });
+            }
+
+            // Close search overlay
+            if (searchClose && searchOverlay) {
+                searchClose.addEventListener('click', () => {
+                    searchOverlay.classList.remove('active');
+                    if (overlayInput) {
+                        overlayInput.value = '';
+                        overlayInput.dispatchEvent(new Event('input')); // Reset search results
+                    }
+                });
+            }
+
+            if (overlayInput && overlayResults) {
+                initLiveSearch(overlayInput, overlayResults);
+                overlayInput.addEventListener('input', () => {
+                    if (searchHint) searchHint.style.display = overlayInput.value.trim().length > 0 ? 'none' : 'block';
+                });
+            }
+
+            // Mobile navigation toggle
+            const navToggle = document.getElementById('navToggle');
+            const navLinks = document.getElementById('navLinks');
+            
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navToggle.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+
+                // Close menu when clicking a link
+                navLinks.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('active');
+                    });
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                        navToggle.classList.remove('active');
+                        navLinks.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    <!-- Floating Button to JFlix -->
+    <a href="https://jflix.uk" class="floating-button">
+        <img src="../images/jflix floating button.png" alt="JFlix">
+        <span class="tooltip">Go to JFlix</span>
+    </a>
+    <!-- Ads (web browser & PWA only) -->
+    <script src="js/aniu-ads.js?v=49.0"></script>
+    <script src="js/aniu-smartlinks.js?v=48.0"></script>
+</body>
+</html>

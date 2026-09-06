@@ -1,0 +1,223 @@
+/* ============================================================
+   JFlix Motion System — Animations & Transitions
+   Import AFTER tokens.css: @import 'tokens.css'; @import 'motion.css';
+   ============================================================ */
+
+/* ── Global Transition Defaults ── */
+*,
+*::before,
+*::after {
+  transition-property: color, background-color, border-color,
+                       box-shadow, transform, opacity, filter;
+  transition-duration: var(--dur-base);
+  transition-timing-function: var(--ease);
+}
+
+/* Override for specific properties that need faster response */
+:where(button, a, input, select, textarea, [role="button"]) {
+  transition-duration: var(--dur-fast);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton { animation: none; background: var(--bg-2); }
+}
+
+/* ── Core Keyframes ── */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes scale-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--brand-glow); }
+  50% { box-shadow: 0 0 24px 6px var(--brand-glow); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--brand-glow); }
+  70% { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 var(--brand-glow); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0); } }
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+@keyframes progress-stripe {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
+}
+
+/* ── Utility Animation Classes ── */
+.animate-fade-in { animation: fade-in var(--dur-base) var(--ease-out) forwards; }
+.animate-fade-out { animation: fade-out var(--dur-fast) var(--ease-in) forwards; }
+
+.animate-slide-up { animation: slide-up var(--dur-base) var(--ease-out) forwards; }
+.animate-slide-down { animation: slide-down var(--dur-base) var(--ease-out) forwards; }
+.animate-slide-left { animation: slide-left var(--dur-base) var(--ease-out) forwards; }
+.animate-slide-right { animation: slide-right var(--dur-base) var(--ease-out) forwards; }
+
+.animate-scale-in { animation: scale-in var(--dur-fast) var(--ease-spring) forwards; }
+.animate-scale-out { animation: scale-out var(--dur-fast) var(--ease-in) forwards; }
+.animate-zoom-in { animation: zoom-in var(--dur-base) var(--ease-spring) forwards; }
+
+.animate-pulse-glow { animation: pulse-glow 2s var(--ease) infinite; }
+.animate-pulse-ring { animation: pulse-ring 1.5s var(--ease-out) infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-bounce-subtle { animation: bounce-subtle 2s var(--ease) infinite; }
+.animate-wiggle { animation: wiggle 0.5s var(--ease) infinite; }
+
+/* ── Staggered Entrance ── */
+.stagger > * { opacity: 0; animation: slide-up var(--dur-base) var(--ease-out) forwards; }
+.stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger > *:nth-child(2)  { animation-delay: 50ms; }
+.stagger > *:nth-child(3)  { animation-delay: 100ms; }
+.stagger > *:nth-child(4)  { animation-delay: 150ms; }
+.stagger > *:nth-child(5)  { animation-delay: 200ms; }
+.stagger > *:nth-child(6)  { animation-delay: 250ms; }
+.stagger > *:nth-child(7)  { animation-delay: 300ms; }
+.stagger > *:nth-child(8)  { animation-delay: 350ms; }
+
+/* Reverse stagger for exit */
+.stagger-reverse > * { opacity: 0; animation: slide-down var(--dur-fast) var(--ease-in) forwards; }
+.stagger-reverse > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger-reverse > *:nth-child(2)  { animation-delay: 30ms; }
+.stagger-reverse > *:nth-child(3)  { animation-delay: 60ms; }
+.stagger-reverse > *:nth-child(4)  { animation-delay: 90ms; }
+
+/* ── Skeleton Loading ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s var(--ease) infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+  height: 1em;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+.skeleton-text:last-child { width: 60%; }
+.skeleton-text:nth-child(2) { width: 80%; }
+
+.skeleton-avatar { width: 48px; height: 48px; border-radius: var(--radius-full); }
+.skeleton-card { border-radius: var(--radius-lg); }
+.skeleton-circle { border-radius: var(--radius-full); }
+.skeleton-btn { height: 40px; border-radius: var(--radius-md); width: 120px; }
+
+/* ── Hover Lift (for cards/buttons) ── */
+.hover-lift { transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+.hover-lift:active { transform: translateY(0) scale(0.98); }
+
+.hover-lift-lg:hover { transform: translateY(-4px); box-shadow: var(--shadow-3); }
+
+/* ── Focus Ring ── */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-glow), 0 0 0 1px var(--border-focus);
+}
+
+/* ── Page Transitions ── */
+.page-enter { animation: fade-in var(--dur-base) var(--ease-out), slide-up var(--dur-base) var(--ease-out); }
+.page-exit { animation: fade-out var(--dur-fast) var(--ease-in), slide-down var(--dur-fast) var(--ease-in); }
+
+/* ── Modal/Overlay ── */
+.modal-backdrop { animation: fade-in var(--dur-fast) var(--ease-out); }
+.modal-content { animation: scale-in var(--dur-base) var(--ease-spring); }
+
+/* ── Toast/Notification ── */
+.toast-enter { animation: slide-right var(--dur-base) var(--ease-spring); }
+.toast-exit { animation: slide-left var(--dur-fast) var(--ease-in); }
+
+/* ── Dropdown/Menu ── */
+.dropdown-enter { animation: scale-in var(--dur-fast) var(--ease-out), fade-in var(--dur-fast) var(--ease-out); }
+.dropdown-exit { animation: scale-out var(--dur-fast) var(--ease-in), fade-out var(--dur-fast) var(--ease-in); }
+
+/* ── Tooltip ── */
+.tooltip-enter { animation: scale-in var(--dur-instant) var(--ease-out), fade-in var(--dur-instant); }
+.tooltip-exit { animation: fade-out var(--dur-instant); }
+
+/* ── Tab/Content Switch ── */
+.tab-content-enter { animation: fade-in var(--dur-base) var(--ease-out); }
+.tab-content-exit { animation: fade-out var(--dur-fast) var(--ease-in); }
+
+/* ── Accordion ── */
+.accordion-content { overflow: hidden; }
+.accordion-open { animation: slide-down var(--dur-base) var(--ease-out); }
+.accordion-close { animation: slide-up var(--dur-fast) var(--ease-in); }
+
+/* ── Progress Bar ── */
+.progress-bar {
+  background: linear-gradient(90deg, var(--brand), var(--brand-light));
+  background-size: 40px 100%;
+  animation: progress-stripe 1s linear infinite;
+}
+
+/* ── Scroll Reveal (IntersectionObserver) ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-left { transform: translateX(-30px); }
+.reveal-left.visible { transform: translateX(0); }
+.reveal-right { transform: translateX(30px); }
+.reveal-right.visible { transform: translateX(0); }
+.reveal-scale { transform: scale(0.9); }
+.reveal-scale.visible { transform: scale(1); }
+
+/* Delay variants for reveal */
+.reveal-d1 { transition-delay: 100ms; }
+.reveal-d2 { transition-delay: 200ms; }
+.reveal-d3 { transition-delay: 300ms; }
+.reveal-d4 { transition-delay: 400ms; }

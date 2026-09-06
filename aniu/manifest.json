@@ -1,0 +1,26 @@
+{
+  "name": "ANIU by JFlix - Watch Free Anime",
+  "short_name": "ANIU",
+  "description": "Watch free anime online on ANIU by JFlix. Stream trending, popular, and recently updated anime in HD.",
+  "start_url": "/aniu/index.html",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#141414",
+  "orientation": "portrait-primary",
+  "scope": "/aniu/",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "video"]
+}

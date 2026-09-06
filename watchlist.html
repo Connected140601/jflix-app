@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/platform-guard.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="description" content="Access your personalized Watch Later library on JFlix. Stream your saved movies, TV series, anime, and Asian dramas anytime for free.">
+  <meta name="keywords" content="watch later, watchlist, my list, stream saved movies, jflix library, saved tv shows">
+  <link rel="canonical" href="https://jflix.uk/watchlist.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jflix.uk/watchlist.html">
+  <meta property="og:title" content="My Watch Later | JFlix Streaming">
+  <meta property="og:description" content="Access your personalized Watch Later library on JFlix. Stream your saved movies, TV series, anime, and Asian dramas anytime.">
+  <meta property="og:image" content="https://jflix.uk/images/og-default.png">
+  <meta property="og:site_name" content="JFlix">
+
+  <title>My Watch Later | JFlix Streaming</title>
+
+  <!-- Design System Tokens & Unified Styling -->
+  <link rel="stylesheet" href="css/tokens.css?v=1.0">
+  <link rel="stylesheet" href="css/motion.css?v=1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.0">
+  <link rel="stylesheet" href="css/animations.css?v=48.0">
+  <link rel="stylesheet" href="css/common.css?v=49.0">
+  <link rel="stylesheet" href="css/home.css?v=49.0">
+  <link rel="stylesheet" href="css/card-fix.css?v=49.0">
+  <link rel="stylesheet" href="css/loader.css?v=50.0">
+  <link rel="stylesheet" href="css/responsive.css?v=48.0">
+  <link rel="stylesheet" href="css/watchlist.css?v=51.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512x512.png">
+
+  <!-- Core Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js?v=48.0"></script>
+  <script src="js/loader.js?v=51.0"></script>
+  <script defer src="js/navbar.js?v=48.0"></script>
+  <script defer src="js/common.js?v=48.0"></script>
+  <script src="js/footer-loader.js?v=48.0"></script>
+  <script defer src="js/watchlist.js?v=51.0"></script>
+</head>
+<body class="watchlist-page">
+  <!-- Smooth Cinematic Page Loader -->
+  <div id="loader" class="loader-wrapper">
+    <div class="loader-inner">
+      <div class="loader-spinner-box">
+        <div class="loader"></div>
+        <div class="loader-core"></div>
+      </div>
+      <div class="loader-text">Loading Watch Later</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Unified Navigation Bar -->
+  <div class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="images/logo.svg" alt="JFlix Logo">
+        </div>
+      </a>
+      <button class="hamburger-menu" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+      </button>
+    </div>
+    <div class="navbar-right">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html" class="movies">Movies</a>
+        <a href="tvshows.html" class="tvshows">TV Shows</a>
+        <a href="anime.html" class="anime">Anime</a>
+        <a href="korean.html" class="korean">Korean TV</a>
+        <a href="cartoon.html" class="cartoon">Cartoons</a>
+        <a href="watchlist.html" class="active watchlist-nav-link"><i class="fas fa-bookmark"></i> Watch Later <span class="nav-watchlist-count" style="display:none;"></span></a>
+        <a href="index.html?open_search=true" class="search-nav-link"><i class="fas fa-search"></i> Search</a>
+      </div>
+      
+      <!-- Auth Buttons (shown when logged out) -->
+      <div class="auth-buttons" style="display: none; margin-left: 15px;">
+        <button class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </div>
+
+      <!-- User Menu / Auth -->
+      <div class="user-menu" style="display: none; margin-left: 15px;">
+        <a href="profile.html" data-no-loader style="display: flex; align-items: center; gap: 8px; text-decoration: none; position: relative;">
+          <img src="" alt="User" class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #e50914;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Ccircle fill=%22%23666%22 cx=%2216%22 cy=%2216%22 r=%2216%22/%3E%3Ctext fill=%22%23fff%22 font-family=%22Arial%22 font-size=%2216%22 x=%2216%22 y=%2222%22 text-anchor=%22middle%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E';">
+          <span id="header-profile-unread-badge" style="position:absolute;top:-4px;right:-4px;background:#e50914;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;">0</span>
+          <span class="user-name" style="color: #fff; font-size: 13px; font-weight: 500;"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watch Later Header -->
+  <header class="watchlist-header">
+    <div class="watchlist-hero">
+      <div class="watchlist-title-group">
+        <div class="watchlist-icon-circle">
+          <i class="fas fa-bookmark"></i>
+        </div>
+        <div>
+          <h1 class="watchlist-title">
+            Watch Later
+            <span class="watchlist-count-badge" id="watchlist-count-badge">0 Titles</span>
+          </h1>
+          <p class="watchlist-subtitle">Your personalized queue of movies, series & anime ready to stream</p>
+        </div>
+      </div>
+      <div class="watchlist-actions">
+        <button class="watchlist-clear-btn" id="watchlist-clear-btn" style="display: none;">
+          <i class="fas fa-trash-alt"></i> Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Controls Bar: Category Chips + Search + Sort -->
+    <div class="watchlist-controls">
+      <div class="watchlist-filter-chips">
+        <button class="filter-chip active" data-category="all">All <span class="chip-count"></span></button>
+        <button class="filter-chip" data-category="movie">Movies <span class="chip-count"></span></button>
+        <button class="filter-chip" data-category="tv">TV Shows <span class="chip-count"></span></button>
+        <button class="filter-chip" data-category="anime">Anime <span class="chip-count"></span></button>
+        <button class="filter-chip" data-category="korean">K-Drama <span class="chip-count"></span></button>
+        <button class="filter-chip" data-category="cartoon">Cartoons <span class="chip-count"></span></button>
+      </div>
+
+      <div class="watchlist-filter-tools">
+        <div class="watchlist-search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="watchlist-search" placeholder="Search saved titles..." aria-label="Search saved titles">
+        </div>
+        <select class="watchlist-sort-select" id="watchlist-sort" aria-label="Sort watchlist">
+          <option value="recent">Recently Added</option>
+          <option value="rating">Highest Rated</option>
+          <option value="title">Title (A-Z)</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Watchlist Content Area -->
+  <main class="watchlist-container">
+    <!-- Responsive Card Grid -->
+    <div class="watchlist-grid" id="watchlist-grid">
+      <!-- Populated dynamically by js/watchlist.js -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="watchlist-empty-state" id="watchlist-empty" style="display: none;">
+      <div class="empty-icon-wrap">
+        <i class="fas fa-bookmark"></i>
+      </div>
+      <h2 class="empty-title">Your Watch Later list is empty</h2>
+      <p class="empty-description">
+        Save movies, series, and anime to your personal library by clicking the <strong>+</strong> button on any card or details page.
+      </p>
+      <a href="index.html" class="empty-browse-btn">
+        <i class="fas fa-compass"></i> Explore Trending Content
+      </a>
+    </div>
+  </main>
+
+  <!-- Clear All Confirmation Modal -->
+  <div class="watchlist-modal" id="clear-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="watchlist-modal-card">
+      <h3 id="modal-title">Clear Watch Later List?</h3>
+      <p>Are you sure you want to remove all saved titles from your list? This action cannot be undone.</p>
+      <div class="watchlist-modal-actions">
+        <button class="watchlist-modal-cancel" id="modal-cancel-btn">Cancel</button>
+        <button class="watchlist-modal-confirm" id="modal-confirm-btn">Yes, Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+</body>
+</html>

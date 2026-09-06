@@ -1,0 +1,44 @@
+{
+  "name": "JFlix Admin Dashboard",
+  "short_name": "JFlix Admin",
+  "description": "JFlix Admin Dashboard for managing users, content, and messages",
+  "start_url": "/admin.html",
+  "display": "standalone",
+  "background_color": "#0d0d1a",
+  "theme_color": "#e50914",
+  "orientation": "any",
+  "scope": "/admin.html",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "notifications": {
+    "title": "JFlix Admin",
+    "icon": "/images/icon-192x192.png"
+  },
+  "shortcuts": [
+    {
+      "name": "Messages",
+      "short_name": "Messages",
+      "description": "View unread messages",
+      "url": "/admin.html",
+      "icons": [
+        {
+          "src": "/images/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

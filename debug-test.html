@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+    <link rel="stylesheet" href="css/common.css?v=49.0">
+    <link rel="stylesheet" href="css/home.css?v=48.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .debug-info {
+            background: #2c2c2c;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: white;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #28a745; }
+        .error { background: #dc3545; }
+</style>
+</head>
+<body>
+    <div class="debug-info">
+        <h1>Debug Test Page</h1>
+        <div id="status">Loading...</div>
+        
+        <h2>Checks:</h2>
+        <div id="checks"></div>
+        
+        <h2>Errors:</h2>
+        <div id="errors"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const status = document.getElementById('status');
+            const checks = document.getElementById('checks');
+            const errors = document.getElementById('errors');
+            
+            let checkResults = [];
+            let errorList = [];
+            
+            // Check CSS files
+            const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+            cssLinks.forEach(link => {
+                checkResults.push(`CSS: ${link.href}`);
+            });
+            
+            // Check JS files
+            const jsScripts = document.querySelectorAll('script[src]');
+            jsScripts.forEach(script => {
+                checkResults.push(`JS: ${script.src}`);
+            });
+            
+            // Check critical elements
+            const navbar = document.querySelector('.navbar');
+            const body = document.body;
+            
+            if (navbar) {
+                checkResults.push('✅ Navbar found');
+            } else {
+                errorList.push('❌ Navbar missing');
+            }
+            
+            if (body) {
+                checkResults.push('✅ Body element accessible');
+            } else {
+                errorList.push('❌ Body element missing');
+            }
+            
+            // Display results
+            status.innerHTML = errorList.length === 0 ? 
+                '<div class="status success">✅ Page Loaded Successfully</div>' : 
+                '<div class="status error">❌ ' + errorList.length + ' Errors Found</div>';
+                
+            checks.innerHTML = '<h3>✅ Checks Passed:</h3><pre>' + checkResults.join('\n') + '</pre>';
+            errors.innerHTML = '<h3>❌ Errors Found:</h3><pre>' + errorList.join('\n') + '</pre>';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Adsterra ads.txt
+# Publisher ID: 2684286
+# Verify this entry in your Adsterra dashboard under Websites > ads.txt.
+# The line below is the standard Adsterra ads.txt entry.
+# If Adsterra provided a custom seller/authority token, replace DIRECT with RESELLER and add the token.
+adsterra.com, 2684286, DIRECT

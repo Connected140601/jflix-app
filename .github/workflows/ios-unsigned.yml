@@ -1,0 +1,78 @@
+# Builds the iOS app on a free GitHub-hosted Mac (Xcode preinstalled there —
+# nothing to install on your own machine), then publishes a GitHub Release
+# named dynamically from the build — "JFlix iOS vX.Y.Z (build N)" — with the
+# UNSIGNED .ipa attached. Sign it afterwards with Sideloadly/AltStore using
+# a free Apple ID.
+#
+# Run: Actions tab → "iOS unsigned IPA" → Run workflow.
+name: iOS unsigned IPA
+
+on:
+  workflow_dispatch:
+
+# Needed so the workflow can create tags + releases.
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Read version from Xcode project
+        id: ver
+        run: |
+          MV=$(grep -m1 'MARKETING_VERSION = ' ios-app/JFlix.xcodeproj/project.pbxproj | sed 's/.*= //;s/;//')
+          BV=$(grep -m1 'CURRENT_PROJECT_VERSION = ' ios-app/JFlix.xcodeproj/project.pbxproj | sed 's/.*= //;s/;//')
+          echo "marketing=$MV" >> "$GITHUB_OUTPUT"
+          echo "build=$BV" >> "$GITHUB_OUTPUT"
+          echo "tag=v$MV" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $MV (build $BV)"
+
+      - name: Archive without signing
+        run: |
+          cd ios-app
+          xcodebuild -project JFlix.xcodeproj \
+            -scheme JFlix \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/JFlix.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            archive
+
+      - name: Package unsigned IPA
+        run: |
+          IPA="JFlix-iOS-v${{ steps.ver.outputs.marketing }}-unsigned.ipa"
+          echo "IPA_NAME=$IPA" >> "$GITHUB_ENV"
+          rm -rf Payload "$IPA"
+          mkdir Payload
+          cp -R "$RUNNER_TEMP/JFlix.xcarchive/Products/Applications/JFlix.app" Payload/
+          zip -r "$IPA" Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JFlix-unsigned-ipa
+          path: ${{ env.IPA_NAME }}
+          retention-days: 7
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: "JFlix iOS v${{ steps.ver.outputs.marketing }} (build ${{ steps.ver.outputs.build }})"
+          body: |-
+            Automated release from the Xcode project version stamp.
+
+            - Version: ${{ steps.ver.outputs.marketing }} (build ${{ steps.ver.outputs.build }})
+            - Unsigned IPA — sideload with Sideloadly/AltStore using a free Apple ID,
+              then trust it in Settings > General > VPN & Device Management.
+              Free certificates last 7 days.
+          files: ${{ env.IPA_NAME }}

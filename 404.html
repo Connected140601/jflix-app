@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/platform-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>404 - Page Not Found | JFlix</title>
+  <meta name="description" content="The page you are looking for cannot be found. Explore free movies, TV shows, anime, and more on JFlix.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://jflix.uk/404.html">
+  <link rel="icon" type="image/png" href="/images/icon-192x192.png">
+  <link rel="stylesheet" href="css/tokens.css?v=1.0">
+  <link rel="stylesheet" href="css/motion.css?v=1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.0">
+  <link rel="stylesheet" href="css/loader.css?v=50.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="js/loader.js?v=51.0"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-body, 'Inter', sans-serif);
+      background-color: var(--bg-primary, #08080d);
+      background-image: radial-gradient(circle at 50% 30%, rgba(229, 9, 20, 0.12) 0%, transparent 65%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .error-card {
+      background: var(--bg-surface, rgba(16, 17, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl, 24px);
+      padding: 48px 36px;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(229, 9, 20, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo {
+      width: 130px;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 4px 12px rgba(229, 9, 20, 0.3));
+    }
+    h1 {
+      font-family: var(--font-display, 'Outfit', sans-serif);
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #ff3b45 0%, #e50914 50%, #990008 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(229, 9, 20, 0.4);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-family: var(--font-display, 'Outfit', sans-serif);
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+    p {
+      color: #a1a1b5;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 28px;
+      width: 100%;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: var(--border-radius-sm, 12px);
+      text-decoration: none;
+      font-family: var(--font-display, 'Outfit', sans-serif);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      transition: all 0.22s cubic-bezier(0.2, 0.6, 0.2, 1);
+      cursor: pointer;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn-primary {
+      background: var(--primary-gradient, linear-gradient(135deg, #e50914, #b20710));
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 8px 26px rgba(229, 9, 20, 0.65);
+    }
+    .btn-offer {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-offer:hover {
+      box-shadow: 0 8px 26px rgba(16, 185, 129, 0.55);
+    }
+    .search-box {
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: rgba(229, 9, 20, 0.6);
+      background: rgba(255, 255, 255, 0.09);
+      box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+    }
+    .search-box input::placeholder { color: #777; }
+    .footer-text {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .footer-text a { color: #ff4d56; text-decoration: none; }
+    .footer-text a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div id="loader" class="loader-wrapper">
+    <div class="loader-inner">
+      <div class="loader-spinner-box">
+        <div class="loader"></div>
+        <div class="loader-core"></div>
+      </div>
+      <div class="loader-text">Loading JFlix</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="error-card">
+    <img src="/images/logo.svg" alt="JFlix Logo" class="logo">
+    <h1>404</h1>
+    <h2>Oops! Page Not Found</h2>
+    <p>The title or page you are looking for may have been removed, renamed, or is temporarily unavailable.</p>
+
+    <div class="search-box">
+      <input type="text" placeholder="Search for movies, TV shows, anime..." onkeydown="if(event.key==='Enter'){window.location.href='index.html?open_search=true';}">
+    </div>
+
+    <div class="buttons">
+      <a href="/index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
+      <a href="https://heavinessslight.com/b8efvmfmh?key=c2d33d16418844aad26060fef0ceb707" target="_blank" rel="noopener" class="btn btn-offer"><i class="fas fa-gift"></i> Special Offers</a>
+    </div>
+
+    <p class="footer-text">
+      &copy; 2026 JFlix. <a href="/index.html">Watch free movies and TV shows</a>.
+    </p>
+  </div>
+
+  <!-- Adsterra Social Bar -->
+  <script defer src="https://heavinessslight.com/55/db/4a/55db4af92ab5047a54bf7fe8d75e9b9d.js"></script>
+</body>
+</html>

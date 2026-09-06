@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Anime API Test</title>
+</head>
+<body>
+    <h1>Anime API Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_KEY = '84549ba3644ea15176802ec153bd9442';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        
+        async function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing API...</p>';
+            
+            try {
+                const url = `${BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=ja&sort_by=popularity.desc&page=1`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                results.innerHTML = `
+                    <h2>API Response:</h2>
+                    <p>Status: ${response.status}</p>
+                    <p>Total Results: ${data.results ? data.results.length : 0}</p>
+                    <h3>First 3 Results:</h3>
+                    <pre>${JSON.stringify(data.results ? data.results.slice(0, 3) : [], null, 2)}</pre>
+                `;
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

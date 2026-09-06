@@ -1,0 +1,31 @@
+name = "jflixuk"
+compatibility_date = "2024-04-18"
+
+# Pages configuration
+pages_build_output_dir = "."
+
+# Exclude large files from Pages deployment
+[pages_build]
+exclude = ["electron-admin/**", "dist/**", "electron/**", "android-app/**", "android supa/**", "aniu/**"]
+
+# D1 Database configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "jflix-db"
+database_id = "c86f9e76-1195-4887-b9b6-321dffc9f062"
+
+# Environment variables
+[vars]
+API_URL = "https://jflix.uk/api"
+
+# Production environment
+[env.production]
+
+# D1 Database configuration for production
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "jflix-db"
+database_id = "c86f9e76-1195-4887-b9b6-321dffc9f062"
+
+[env.production.vars]
+API_URL = "https://jflix-api.junrel-sapantaicloud.workers.dev/api"

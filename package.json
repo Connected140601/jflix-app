@@ -1,0 +1,116 @@
+{
+  "name": "jflix-desktop",
+  "version": "1.4.1",
+  "description": "JFlix Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win nsis portable",
+    "build-win-setup": "electron-builder --win nsis --x64",
+    "build-win-portable": "electron-builder --win portable --x64",
+    "build-mac": "electron-builder --mac dmg --x64 --arm64",
+    "build-mac-silicon": "electron-builder --mac pkg --arm64",
+    "build-mac-intel": "electron-builder --mac pkg --x64",
+    "build-all": "electron-builder --mac dmg --x64 --arm64 && electron-builder --win nsis portable",
+    "deploy:testing": "wrangler pages deploy . --project-name=jflixtesting --branch=main --commit-dirty=true"
+  },
+  "author": "JFlix",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.jflix.desktop",
+    "productName": "JFlix",
+    "copyright": "Copyright © 2024 JFlix",
+    "directories": {
+      "output": "dist"
+    },
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "assets/**",
+      "js/**",
+      "css/**",
+      "images/**",
+      "templates/**",
+      "*.html",
+      "*.json",
+      "LICENSE.txt"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "JFlix",
+      "artifactName": "JFlix-Setup-${version}.exe",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "displayLanguageSelector": false,
+      "installerLanguages": [
+        "en_US"
+      ],
+      "license": "LICENSE.txt",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "JFlix-${version}-Portable.exe"
+    },
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "icon": "assets/icon.icns",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "target": [
+        {
+          "target": "pkg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "pkg": {
+      "installLocation": "/Applications",
+      "allowAnywhere": false,
+      "allowCurrentUserHome": false,
+      "allowRootDirectory": false,
+      "isRelocatable": false,
+      "overwriteAction": "upgrade",
+      "scripts": "scripts/pkg-scripts",
+      "artifactName": "JFlix-${version}-${arch}.pkg"
+    }
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.709.0",
+    "@supabase/supabase-js": "^2.46.2",
+    "ffmpeg-static": "^5.3.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

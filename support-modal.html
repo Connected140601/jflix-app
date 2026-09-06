@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support JFlix</title>
+
+  <!-- Hide ads in Android WebView -->
+  <script>
+    (function() {
+      var ua = navigator.userAgent;
+      var isAndroidWebView = /Android/.test(ua) && /wv/.test(ua);
+      if (isAndroidWebView) {
+        var style = document.createElement('style');
+        style.textContent = '.ad-desktop, .ad-mobile, .ad-mobile-only, .search-ad-left, .ad-sidebar { display: none !important; }';
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
+
+<style>        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+            background: #08080d;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 4, 8, 0.88);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        
+        .support-modal {
+            background: rgba(16, 17, 26, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 36px 30px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(229, 9, 20, 0.2);
+            animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-24px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .support-icon {
+            font-size: 52px;
+            color: #e50914;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 16px rgba(229, 9, 20, 0.5));
+            display: inline-block;
+            animation: pulseIcon 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        
+        .support-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+        
+        .support-text {
+            font-size: 15px;
+            color: #a6a8bc;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .instructions ol {
+            color: #c4c5d6;
+            font-size: 13.5px;
+            line-height: 1.75;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        .ad-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 24px;
+            min-height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+        }
+        
+        .reload-button {
+            background: linear-gradient(135deg, #ff2a35 0%, #b20710 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(229, 9, 20, 0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(16px);
+        }
+        
+        .reload-button.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .reload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(229, 9, 20, 0.65);
+        }
+
+        .reload-button:active {
+            transform: scale(0.97);
+        }
+        
+        .countdown {
+            font-size: 13px;
+            color: #8a8c9e;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #a6a8bc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(229, 9, 20, 0.2);
+            border-color: rgba(229, 9, 20, 0.4);
+            color: #ffffff;
+            transform: rotate(90deg);
+        }
+        
+        @media (max-width: 600px) {
+            .support-modal {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .support-title {
+                font-size: 24px;
+            }
+            
+            .instructions {
+                padding: 15px;
+            }
+        }
+</style>
+</head>
+<body>
+    <div class="modal-overlay" id="supportModal">
+        <div class="support-modal" style="position: relative;">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            
+            <div class="support-icon">❤️</div>
+            <h2 class="support-title">Support JFlix</h2>
+            <p class="support-text">Help us keep the website running and free for everyone!</p>
+            
+            <div class="instructions">
+                <h3>📋 Simple Instructions:</h3>
+                <ol>
+                    <li>Click on the ad below to support us</li>
+                    <li>A new tab will open - you can close it quickly</li>
+                    <li>Wait for the reload button to appear (6 seconds)</li>
+                    <li>Click the reload button to continue</li>
+                </ol>
+            </div>
+            
+            <div class="ad-container">
+                <!-- Adsterra Vertical Banner Ad (160x300) -->
+                <script>
+                    atOptions = {
+                        'key' : '985241e815704103478c2ec28530d20a',
+                        'format' : 'iframe',
+                        'height' : 250,
+                        'width' : 300,
+                        'params' : {}
+                    };
+                </script>
+                <script src="https://heavinessslight.com/985241e815704103478c2ec28530d20a/invoke.js"></script>
+            </div>
+            
+            <button class="reload-button" id="reloadButton" onclick="reloadWebsite()">
+                🔄 Reload Website
+            </button>
+            <div class="countdown" id="countdown">Please wait <span id="seconds">6</span> seconds...</div>
+        </div>
+    </div>
+    
+    <script>
+        let countdownInterval;
+        let secondsLeft = 6;
+        
+        // Check if modal should show (24-hour logic)
+        function shouldShowModal() {
+            const lastShown = localStorage.getItem('supportModalLastShown');
+            if (!lastShown) return true;
+            
+            const lastShownTime = parseInt(lastShown);
+            const currentTime = Date.now();
+            const hoursSinceLastShow = (currentTime - lastShownTime) / (1000 * 60 * 60);
+            
+            return hoursSinceLastShow >= 24;
+        }
+        
+        // Show modal and start countdown
+        function showModal() {
+            if (!shouldShowModal()) return;
+            
+            const modal = document.getElementById('supportModal');
+            modal.style.display = 'flex';
+            
+            // Start countdown for reload button
+            startCountdown();
+            
+            // Mark when modal was shown
+            localStorage.setItem('supportModalLastShown', Date.now().toString());
+        }
+        
+        // Start countdown for reload button
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            const secondsElement = document.getElementById('seconds');
+            const reloadButton = document.getElementById('reloadButton');
+            
+            secondsLeft = 6;
+            secondsElement.textContent = secondsLeft;
+            
+            countdownInterval = setInterval(() => {
+                secondsLeft--;
+                secondsElement.textContent = secondsLeft;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+                    reloadButton.classList.add('show');
+                }
+            }, 1000);
+        }
+        
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('supportModal');
+            modal.style.display = 'none';
+            clearInterval(countdownInterval);
+        }
+        
+        // Reload website
+        function reloadWebsite() {
+            window.location.reload();
+        }
+        
+        // Initialize modal on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure page is fully loaded
+            setTimeout(showModal, 1000);
+        });
+        
+        // Handle escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        // Handle click outside modal
+        document.getElementById('supportModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/platform-guard.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="description" content="Watch movies, TV shows, anime, and K-dramas for free on JFlix. View details, synopsis, cast, ratings, and stream instantly.">
+  <meta name="keywords" content="watch free movies, movie details, TV show details, anime details, K-drama details, JFlix, stream online, cast, synopsis">
+  <link rel="canonical" href="https://jflix.uk/details.html">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jflix.uk/details.html">
+  <meta property="og:title" content="Watch Movies & TV Shows Free | JFlix Details">
+  <meta property="og:description" content="Watch movies, TV shows, anime, and K-dramas for free on JFlix. View details, synopsis, cast, ratings, and stream instantly.">
+  <meta property="og:image" content="https://jflix.uk/images/og-default.png">
+  <meta property="og:site_name" content="JFlix">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://jflix.uk/details.html">
+  <meta property="twitter:title" content="Watch Movies & TV Shows Free | JFlix Details">
+  <meta property="twitter:description" content="Watch movies, TV shows, anime, and K-dramas for free on JFlix. View details, synopsis, cast, ratings, and stream instantly.">
+  <meta property="twitter:image" content="https://jflix.uk/images/og-default.png">
+
+  <!-- Hide ads in Android WebView -->
+  <script>
+    (function() {
+      var ua = navigator.userAgent;
+      var isAndroidWebView = /Android/.test(ua) && /wv/.test(ua);
+      if (isAndroidWebView) {
+        var style = document.createElement('style');
+        style.textContent = '.ad-desktop, .ad-mobile, .ad-mobile-only, .search-ad-left, .ad-sidebar { display: none !important; }';
+        document.head.appendChild(style);
+      }
+    })();
+  </script>
+
+  <title>Watch Movies & TV Shows Free | JFlix Details</title>
+<link rel="stylesheet" href="css/tokens.css?v=1.0">
+  <link rel="stylesheet" href="css/motion.css?v=1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.0">
+  <link rel="stylesheet" href="css/animations.css?v=48.0">
+  <link rel="stylesheet" href="css/home.css?v=49.0">
+  <link rel="stylesheet" href="css/card-fix.css?v=49.0">
+  <link rel="stylesheet" href="css/common.css?v=49.0">
+  <link rel="stylesheet" href="css/loading.css?v=48.0">
+  <link rel="stylesheet" href="css/homepage.css?v=48.0">
+  <link rel="stylesheet" href="css/search-results.css?v=48.0">
+  <link rel="stylesheet" href="css/anime-section.css?v=48.0">
+  <link rel="stylesheet" href="css/loader.css?v=50.0">
+  <link rel="stylesheet" href="css/details.css?v=51.0">
+  <link rel="stylesheet" href="css/responsive.css?v=48.0">
+  <link rel="stylesheet" href="css/floating-button.css?v=48.0">
+  <link rel="stylesheet" href="css/original-style.css?v=48.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/loader.js?v=52.0"></script>
+  <script src="js/search-filters.js?v=48.0" defer></script>
+  <script src="js/social-link-interceptor.js?v=48.0" defer></script>
+  <script src="js/media-card.js?v=48.0"></script>
+  <script src="js/details.js?v=52.0"></script>
+  <script defer src="js/navbar.js?v=48.0"></script>
+  <script src="js/nav-search.js?v=48.0" defer></script>
+  <script defer src="js/common.js?v=48.0"></script>
+  <script src="js/auth.js?v=48.0"></script>
+  <script src="js/download-app-modal.js?v=48.0&cb=20260617"></script>
+  <script src="js/download-gate.js?v=48.0"></script>
+  <link rel="preload" href="css/details.css?v=51.0" as="style">
+  <link rel="preload" href="js/details.js?v=52.0" as="script">
+  
+  <!-- Favicon and PWA Icons - Consistent Across All Platforms -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512x512.png">
+</head>
+<body>
+  <div id="loader" class="loader-wrapper">
+    <div class="loader-inner">
+      <div class="loader-spinner-box">
+        <div class="loader"></div>
+        <div class="loader-core"></div>
+      </div>
+      <div class="loader-text">Loading Details</div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="images/logo.svg" alt="JFlix Logo">
+        </div>
+      </a>
+      <button class="hamburger-menu" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+      </button>
+    </div>
+    <div class="navbar-right">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="movies.html" class="movies">Movies</a>
+        <a href="tvshows.html" class="tvshows">TV Shows</a>
+        <a href="anime.html" class="anime">Anime</a>
+        <a href="korean.html" class="korean">Korean TV</a>
+        <a href="cartoon.html" class="cartoon">Cartoons</a>
+        <a href="watchlist.html" class="watchlist-nav-link"><i class="fas fa-bookmark"></i> Watch Later <span class="nav-watchlist-count" style="display:none;"></span></a>
+        <a href="index.html?open_search=true" class="search-nav-link"><i class="fas fa-search"></i> Search</a>
+      </div>
+      
+      <!-- Auth Buttons (shown when logged out) -->
+      <div class="auth-buttons" style="display: none; margin-left: 15px;">
+        <button class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </div>
+      
+      <!-- User Menu (shown when logged in) -->
+      <div class="user-menu" style="display: none; margin-left: 15px;">
+        <a href="profile.html" data-no-loader style="display: flex; align-items: center; gap: 8px; text-decoration: none; position: relative;">
+          <img src="" alt="User" class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #e50914;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22%3E%3Ccircle fill=%22%23666%22 cx=%2216%22 cy=%2216%22 r=%2216%22/%3E%3Ctext fill=%22%23fff%22 font-family=%22Arial%22 font-size=%2216%22 x=%2216%22 y=%2222%22 text-anchor=%22middle%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E';">
+          <span id="header-profile-unread-badge" style="position:absolute;top:-4px;right:-4px;background:#e50914;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;">0</span>
+          <span class="user-name" style="color: #fff; font-size: 13px; font-weight: 500;"></span></a><button onclick="openPremiumModal(true)" class="get-premium-btn" style="background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a0a00;border:none;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:5px;letter-spacing:.3px;box-shadow:0 2px 10px rgba(255,180,0,.4);white-space:nowrap;flex-shrink:0;transition:all .2s;" onmouseover="this.style.transform='scale(1.07)';this.style.boxShadow='0 4px 16px rgba(255,180,0,.6)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 2px 10px rgba(255,180,0,.4)';"><i class="fas fa-crown"></i> Get Premium</button>
+        <button class="logout-btn" style="background: none; border: none; color: #888; cursor: pointer; padding: 5px 10px; margin-left: 5px;">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="navigation-controls">
+    <a href="index.html" class="back-button" data-no-loader>
+      <i class="fas fa-arrow-left"></i> Back to home
+    </a>
+  </div>
+
+  <div class="details-container">
+    <div class="details-backdrop" id="details-backdrop"></div>
+    <div class="details-content">
+      <div class="details-header">
+        <div class="details-poster">
+          <img id="movie-poster" src="" alt="Media Poster">
+        </div>
+        <div class="details-info">
+          <h1 id="movie-title"></h1>
+          <div class="movie-meta">
+            <span id="movie-year"></span>
+            <span class="separator">•</span>
+            <span id="movie-runtime"></span>
+            <span class="separator">•</span>
+            <div class="stars" id="movie-rating"></div>
+          </div>
+          <div id="movie-genres"></div>
+          <div class="tagline" id="movie-tagline"></div>
+          <div class="overview">
+            <h3>Overview</h3>
+            <p id="movie-overview"></p>
+          </div>
+          <div class="details-buttons">
+            <button class="btn watch-btn" onclick="showLoader(); watchMovie()"><i class="fas fa-play"></i> Watch Now</button>
+            <button class="btn trailer-btn" onclick="playTrailer()"><i class="fas fa-film"></i> Watch Trailer</button>
+            <button class="btn watchlist-btn-details" id="details-watchlist-btn" onclick="toggleDetailsWatchlist()"><i class="fas fa-plus"></i> Watch Later</button>
+            <button class="btn share-btn" onclick="triggerShareDetails()"><i class="fas fa-share-alt"></i> Share</button>
+            <a href="https://heavinessslight.com/b8efvmfmh?key=c2d33d16418844aad26060fef0ceb707" target="_blank" rel="noopener" class="btn offers-btn" style="background:linear-gradient(135deg,#4ecdc4,#2d8a82);color:#fff;text-decoration:none;"><i class="fas fa-gift"></i> Special Offers</a>
+          </div>
+          <div class="third-party-disclaimer">
+            <i class="fas fa-info-circle"></i> JFlix does not host, upload, or store any video files. All content is provided by third-party sources and is available on the public internet.
+          </div>
+        </div>
+      </div>
+
+      <!-- Ad Section 1 - After Details Header -->
+      <div class="ad-section ad-after-details-header" style="text-align: center; margin: 30px 0; padding: 15px;">
+        <!-- Leaderboard Ad (728x90) - Desktop -->
+        <div class="ad-desktop" style="display: inline-block;">
+          <script>
+            atOptions = {
+              'key' : 'a3497336bfd1bd0d9eb6314a119b322d',
+              'format' : 'iframe',
+              'height' : 90,
+              'width' : 728,
+              'params' : {}
+            };
+          </script>
+          <script src="https://heavinessslight.com/a3497336bfd1bd0d9eb6314a119b322d/invoke.js"></script>
+        </div>
+        <!-- Mobile Banner Ad (320x50) - Mobile -->
+        <div class="ad-mobile" style="display: none;">
+          <script>
+            atOptions = {
+              'key' : '3d2cdb24291c0ef1776d8e5f8b73b5f7',
+              'format' : 'iframe',
+              'height' : 50,
+              'width' : 320,
+              'params' : {}
+            };
+          </script>
+          <script src="https://heavinessslight.com/3d2cdb24291c0ef1776d8e5f8b73b5f7/invoke.js"></script>
+        </div>
+      </div>
+
+      <!-- Browser Notice for In-App Browsers - Modal Overlay -->
+      <div id="browser-notice" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 999999; display: none; overflow-y: auto; padding: 20px;">
+        <div style="max-width: 600px; margin: 50px auto; background-color: #fff3cd; color: #856404; padding: 30px; text-align: left; font-size: 14px; border: 3px solid #ffc107; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+          <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #ffc107;">
+            <strong style="font-size: 20px; color: #dc3545;">⚠️ OPEN IN EXTERNAL BROWSER FOR BEST EXPERIENCE</strong>
+            <p style="margin-top: 15px; font-size: 14px; color: #856404; font-weight: 500;">This notice cannot be closed. Please follow the instructions below.</p>
+          </div>
+        
+        <div id="fb-instructions" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #1877f2;">
+          <p><strong>📘 FACEBOOK INSTRUCTIONS:</strong></p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>Android:</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the menu icon (three lines ≡) or three dots (⋮) in the top right</p>
+          <p style="margin: 5px 0 5px 20px;">2. Scroll down and tap "Open in Browser" or "Open in Chrome"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Chrome, Firefox, or your default browser</p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>iOS (iPhone/iPad):</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the menu icon (three lines ≡) or three dots (⋯) in the top right</p>
+          <p style="margin: 5px 0 5px 20px;">2. Scroll down and tap "Open in Browser" or "Open in Safari"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Safari, Chrome, or Firefox</p>
+        </div>
+        
+        <div id="messenger-instructions" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #0084ff;">
+          <p><strong>💬 MESSENGER INSTRUCTIONS:</strong></p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>Android:</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the three dots (⋮) in the lower left corner</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in external browser"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Chrome, Firefox, or your default browser</p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>iOS (iPhone/iPad):</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the three dots (⋯) in the lower left corner</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in external browser"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Safari, Chrome, or Firefox</p>
+        </div>
+        
+        <div id="tiktok-instructions" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #000000;">
+          <p><strong>🎵 TIKTOK INSTRUCTIONS:</strong></p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>Android:</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the share button (arrow icon ↗) at the bottom right</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Copy Link"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Close TikTok and open Chrome, Firefox, or your browser</p>
+          <p style="margin: 5px 0 5px 20px;">4. Long-press the address bar and tap "Paste"</p>
+          <p style="margin: 5px 0 5px 20px;">5. Tap Go or press Enter</p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>iOS (iPhone/iPad):</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the share button (arrow icon ↗) at the bottom right</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Copy Link"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Close TikTok and open Safari or Chrome</p>
+          <p style="margin: 5px 0 5px 20px;">4. Tap the address bar and tap "Paste"</p>
+          <p style="margin: 5px 0 5px 20px;">5. Tap Go or press Enter</p>
+        </div>
+        
+        <div id="instagram-instructions" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #c13584;">
+          <p><strong>📷 INSTAGRAM INSTRUCTIONS:</strong></p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>Android:</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the three dots (⋮) in the top right corner</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in Browser" or "Open in Chrome"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Chrome, Firefox, or your default browser</p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>iOS (iPhone/iPad):</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the three dots (⋯) in the top right corner</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in Browser" or "Open in Safari"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Safari, Chrome, or Firefox</p>
+        </div>
+        
+        <div id="googleapp-instructions" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #4285F4;">
+          <p><strong>🔍 GOOGLE APP INSTRUCTIONS:</strong></p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>Android:</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the three dots (⋮) in the top right corner</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in Chrome" or "Open in browser"</p>
+          <p style="margin: 5px 0 5px 20px;">3. Select Chrome, Firefox, or your default browser</p>
+          <p style="margin: 10px 0; line-height: 1.6;"><strong>iOS (iPhone/iPad):</strong></p>
+          <p style="margin: 5px 0 5px 20px;">1. Tap the share icon (square with arrow ↑) at the bottom</p>
+          <p style="margin: 5px 0 5px 20px;">2. Tap "Open in Safari" or select Safari from the app list</p>
+          <p style="margin: 5px 0 5px 20px;">3. The link will open in Safari</p>
+        </div>
+        
+        <div id="general-instructions" style="margin-top: 20px; padding: 15px; background-color: #fff; border-radius: 8px; border-left: 4px solid #6c757d;">
+          <p><strong>📱 GENERAL METHOD (All Apps):</strong></p>
+          <p style="margin: 10px 0; line-height: 1.8;">1. Look for the menu icon (three lines ≡) or three dots (⋮ or ⋯) in the top right or bottom of the app</p>
+          <p style="margin: 10px 0; line-height: 1.8;">2. Tap it and look for "Open in Browser", "Open in Safari", "Open in Chrome", or "Open in external browser"</p>
+          <p style="margin: 10px 0; line-height: 1.8;">3. If you don't see that option, tap "Share" or "Copy Link"</p>
+          <p style="margin: 10px 0; line-height: 1.8;">4. Close the app and open Chrome, Safari, Firefox, or Opera</p>
+          <p style="margin: 10px 0; line-height: 1.8;">5. Tap the address bar, paste the link, and press Enter</p>
+        </div>
+        </div>
+      </div>
+      <script>
+        (function() {
+          var notice = document.getElementById('browser-notice');
+          var userAgent = navigator.userAgent;
+          
+          // Detect device type
+          var isAndroid = /Android/i.test(userAgent);
+          var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+          var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          // Detect specific in-app browsers: Facebook, Messenger, Instagram, TikTok, Google App
+          var isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|GSA/i.test(userAgent);
+          
+          // Detect JFlix Android App with unique user agent - silently block modal
+          var isJFlixAndroidApp = /JFlix-Android/i.test(userAgent);
+          
+          // Only show modal if it's a mobile device AND in one of the specific in-app browsers AND NOT JFlix Android App
+          if (notice && isMobile && isInAppBrowser && !isJFlixAndroidApp) {
+            notice.style.display = 'block';
+            
+            var platformInstructions = '';
+            
+            if (/FBAN|FBAV/i.test(userAgent)) {
+              platformInstructions = 'fb-instructions';
+            } else if (/Messenger/i.test(userAgent)) {
+              platformInstructions = 'messenger-instructions';
+            } else if (/TikTok/i.test(userAgent)) {
+              platformInstructions = 'tiktok-instructions';
+            } else if (/Instagram/i.test(userAgent)) {
+              platformInstructions = 'instagram-instructions';
+            } else if (/GSA/i.test(userAgent)) {
+              platformInstructions = 'googleapp-instructions';
+            } else {
+              platformInstructions = 'general-instructions';
+            }
+            
+            // Show the platform-specific instructions
+            document.getElementById(platformInstructions).style.display = 'block';
+            
+            // Hide device-specific instructions based on current device
+            var instructionsDiv = document.getElementById(platformInstructions);
+            if (instructionsDiv) {
+              var paragraphs = instructionsDiv.querySelectorAll('p');
+              var showingAndroid = false;
+              var showingIOS = false;
+              
+              paragraphs.forEach(function(p) {
+                if (p.innerHTML.includes('<strong>Android:</strong>')) {
+                  showingAndroid = true;
+                  if (!isAndroid) {
+                    p.style.display = 'none';
+                    // Hide the next 3 lines (Android instructions)
+                    var nextSiblings = 0;
+                    var current = p.nextElementSibling;
+                    while (current && nextSiblings < 3) {
+                      if (current.tagName === 'P') {
+                        current.style.display = 'none';
+                        nextSiblings++;
+                      }
+                      current = current.nextElementSibling;
+                    }
+                  }
+                }
+                if (p.innerHTML.includes('<strong>iOS (iPhone/iPad):</strong>')) {
+                  showingIOS = true;
+                  if (!isIOS) {
+                    p.style.display = 'none';
+                    // Hide the next 3 lines (iOS instructions)
+                    var nextSiblings = 0;
+                    var current = p.nextElementSibling;
+                    while (current && nextSiblings < 3) {
+                      if (current.tagName === 'P') {
+                        current.style.display = 'none';
+                        nextSiblings++;
+                      }
+                      current = current.nextElementSibling;
+                    }
+                  }
+                }
+              });
+            }
+          }
+        })();
+      </script>
+
+      <div class="details-section">
+        <h2>Cast</h2>
+        <div class="cast-list" id="movie-cast"></div>
+      </div>
+
+      <!-- Episodes Section (TV/Anime/Korean only) -->
+      <div class="details-section episodes-section" id="episodes-section" style="display:none;">
+        <h2>Episodes</h2>
+        <div class="season-tabs" id="season-tabs"></div>
+        <div class="episode-view-toggle" id="episode-view-toggle" style="display:none;">
+          <button id="episode-compact-btn" class="episode-toggle-btn active" onclick="setEpisodeView('compact')">
+            <i class="fas fa-list"></i> Compact
+          </button>
+          <button id="episode-grid-btn" class="episode-toggle-btn" onclick="setEpisodeView('grid')">
+            <i class="fas fa-th-large"></i> Grid
+          </button>
+        </div>
+        <div class="episode-list" id="episode-list">
+          <div class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading episodes...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h2>More Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <h4>Status</h4>
+            <p id="movie-status"></p>
+          </div>
+          <div class="info-item">
+            <h4>Original Language</h4>
+            <p id="movie-language"></p>
+          </div>
+          <div class="info-item">
+            <h4 id="movie-budget-label">Budget</h4>
+            <p id="movie-budget"></p>
+          </div>
+          <div class="info-item">
+            <h4 id="movie-revenue-label">Box Office</h4>
+            <p id="movie-revenue"></p>
+          </div>
+          <div class="info-item">
+            <h4>Production Companies</h4>
+            <p id="movie-companies"></p>
+          </div>
+          <div class="info-item">
+            <h4 id="movie-release-label">Release Date</h4>
+            <p id="movie-release"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h2>Similar Content</h2>
+        <div class="similar-list" id="similar-movies"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="popup-trailer-modal" id="popup-trailer-modal">
+    <div class="popup-trailer-content">
+      <button class="exit-modal-btn"><i class="fas fa-times"></i></button>
+      <div id="popup-trailer-video"></div>
+    </div>
+  </div>
+
+  <div class="search-modal" id="search-modal">
+    <span class="close">&times;</span>
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <input type="text" id="search-input" placeholder="Search for Movies, TV Shows, Anime..." oninput="searchTMDB()" />
+        <button class="search-exit-btn" id="search-exit-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="search-filters">
+        <button class="filter-btn active" data-type="all">All</button>
+        <button class="filter-btn movies" data-type="movie">Movies</button>
+        <button class="filter-btn tvshows" data-type="tv">TV Shows</button>
+        <button class="filter-btn anime" data-type="anime">Anime</button>
+        <button class="filter-btn korean" data-type="korean">Korean TV</button>
+      </div>
+    </div>
+    <div class="results" id="search-results"></div>
+  </div>
+
+  <!-- Share Modal -->
+  <div class="modal" id="share-modal">
+    <div class="modal-content share-modal-content">
+      <span class="close">&times;</span> <!-- onclick will be added by common.js -->
+      <h3 id="share-modal-title-text">Share this content</h3>
+      <div class="share-options">
+        <a href="#" id="share-facebook" class="social-icon facebook" target="_blank" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" id="share-twitter" class="social-icon twitter" target="_blank" title="Share on Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" id="share-whatsapp" class="social-icon whatsapp" target="_blank" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" id="share-telegram" class="social-icon telegram" target="_blank" title="Share on Telegram"><i class="fab fa-telegram-plane"></i></a>
+        <a href="#" id="share-reddit" class="social-icon reddit" target="_blank" title="Share on Reddit"><i class="fab fa-reddit-alien"></i></a>
+        <a href="#" id="share-email" class="social-icon email" title="Share via Email"><i class="fas fa-envelope"></i></a>
+      </div>
+      <div class="copy-link-container">
+        <input type="text" id="share-link-input" readonly>
+        <button class="btn copy-link-btn"><i class="fas fa-copy"></i> Copy Link</button> <!-- onclick will be added by common.js -->
+      </div>
+      <p id="copy-link-feedback" class="copy-feedback"></p>
+    </div>
+  </div>
+</div>
+
+  <!-- Ad Section 2 - Middle of Details Page -->
+  <div class="ad-section ad-middle-details" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Vertical Banner Ad (160x300) -->
+    <script>
+      atOptions = {
+        'key' : '985241e815704103478c2ec28530d20a',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script src="https://heavinessslight.com/985241e815704103478c2ec28530d20a/invoke.js"></script>
+  </div>
+
+  <!-- Ad Section 3 - Bottom of Details Page -->
+  <div class="ad-section ad-bottom-details" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Removed - below-fold ad for better Adsterra compliance -->
+  </div>
+
+  <!-- Ad Section 4 - Before Footer -->
+  <div class="ad-section ad-before-footer" style="text-align: center; margin: 30px 0; padding: 15px;">
+    <!-- Removed - below-fold ad for better Adsterra compliance -->
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/footer-loader.js?v=48.0"></script>
+  <script src="js/social-share.js?v=48.0"></script>
+  <!-- Floating Button to ANIU -->
+  <a href="aniu/index.html" class="floating-button">
+    <img src="images/aniu floating button.png" alt="ANIU">
+    <span class="tooltip">Go to ANIU</span>
+  </a>
+  <script src="js/invite-banner.js?v=48.0"></script>
+  <script src="js/adblock-handler.js?v=48.0"></script>
+  <script src="js/invite-floating-button.js?v=49.0"></script>
+  <script src="js/push-notifications.js?v=48.0"></script>
+  <script src="js/multi-language.js?v=48.0"></script>
+</body>
+</html>
