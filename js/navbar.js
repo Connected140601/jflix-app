@@ -118,8 +118,42 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ─── 5. Loklok/Netflix Mobile Bottom Navigation ────────────────
+  const isIOSAppEnv = () => {
+    const ua = navigator.userAgent || '';
+    return (window.IS_IOS_APP === true) ||
+           (window.IS_IOS_NATIVE === true) ||
+           (document.documentElement && document.documentElement.classList.contains('is-ios-app')) ||
+           (document.body && document.body.classList.contains('is-ios-app')) ||
+           /JFlix-iOS/i.test(ua) ||
+           (/JFlixNativeApp/i.test(ua) && /iPhone|iPad|iPod/i.test(ua));
+  };
+
+  const removeMobileBottomNavIfIOS = () => {
+    if (isIOSAppEnv()) {
+      const existing = document.querySelector('.mobile-bottom-nav');
+      if (existing) existing.remove();
+      document.body.classList.remove('has-bottom-nav');
+      return true;
+    }
+    return false;
+  };
+
   const initMobileBottomNav = () => {
+    // In iOS app, remove bottom navigation since header already features a hamburger menu
+    if (removeMobileBottomNavIfIOS()) return;
+
     if (document.querySelector('.mobile-bottom-nav')) return;
+
+    // Observe documentElement/body for dynamic iOS app class addition
+    try {
+      const iosNavObserver = new MutationObserver(() => {
+        removeMobileBottomNavIfIOS();
+      });
+      iosNavObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      if (document.body) {
+        iosNavObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      }
+    } catch (e) {}
 
     const nav = document.createElement('nav');
     nav.className = 'mobile-bottom-nav';

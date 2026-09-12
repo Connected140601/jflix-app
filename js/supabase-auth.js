@@ -120,7 +120,7 @@ class SupabaseAuth {
       }
 
       // No existing session — trigger OAuth redirect
-      const redirectBase = window.location.origin;
+      const redirectBase = (window.location.origin || 'https://jflix.uk').replace(/\/+$/, '') + '/';
       const { data, error } = await sb.auth.signInWithOAuth({
         provider: 'google',
         options: {

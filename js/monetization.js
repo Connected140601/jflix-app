@@ -626,119 +626,33 @@
   });
 
   function runElectronGate() {
-    if (IS_IOS_NATIVE) return; // iOS native app allows free browsing / no forced payment gate
-    waitForAuth(function () {
-      if (!jflixAuth.isAuthenticated()) {
-        showElectronSignIn();
-      } else {
-        checkElectronPremium();
-      }
-    });
+    // In Electron, Android, and iOS: do NOT block access or force login/premium modal on startup.
+    // The application goes directly to the homepage and users can browse/watch freely without login.
+    _electronGateActive = false;
   }
   window.runElectronGate = runElectronGate;
   window.showElectronSignIn = showElectronSignIn;
 
   function showElectronSignIn() {
-    jflixAuth.openAuthModal();
-
-    // Patch modal to remove guest button and block close
-    var tryPatch = function (tries) {
-      var modal = document.getElementById('auth-modal');
-      if (!modal) { if (tries < 30) setTimeout(function () { tryPatch(tries + 1); }, 100); return; }
-
-      // Hide "Continue as Guest" button
-      var buttons = modal.querySelectorAll('button');
-      buttons.forEach(function (btn) {
-        if (btn.textContent.trim().toLowerCase().includes('guest')) {
-          btn.style.display = 'none';
-        }
-        // Hide the close (×) button so user must sign in
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('closeAuthModal')) {
-          btn.style.display = 'none';
-        }
-      });
-
-      // Prevent backdrop clicks from bubbling to document (does NOT block inner button clicks)
-      modal.addEventListener('click', function (e) {
-        if (e.target === modal) e.stopPropagation();
-      });
-    };
-    setTimeout(function () { tryPatch(0); }, 50);
+    // No-op on startup: user can click "Sign In" in header if they wish to login
   }
 
   async function checkElectronPremium(wasExpired) {
-    try {
-      var user = await jflixAuth.fetchCurrentUser();
-      if (!user) {
-        jflixAuth.logout();
-        showElectronSignIn();
-        return;
-      }
-      if (!isPremiumActive(user)) {
-        _electronGateActive = true;
-        showElectronPremiumRequired(wasExpired ||
-          !!(user.subscriptionType === 'premium' || user.subscription_type === 'premium'));
-      } else {
-        _electronGateActive = false;
-      }
-    } catch (e) {
-      console.error('[Monetization] Error checking electron premium:', e);
-    }
+    _electronGateActive = false;
   }
 
   function showElectronPremiumRequired(wasExpired) {
-    // Build/show the premium modal
-    if (typeof openPremiumModal === 'function') {
-      openPremiumModal();
-    } else {
-      setTimeout(function () { showElectronPremiumRequired(wasExpired); }, 200);
-      return;
-    }
-
-    // After a brief moment, hide close button and optionally add expiry warning
-    setTimeout(function () {
-      var modal = document.getElementById('prem-modal');
-      if (!modal) return;
-
-      // Hide the × close button so user can't dismiss without paying
-      var closeBtn = modal.querySelector('button[onclick*="closePremiumModal"]');
-      if (closeBtn) closeBtn.style.display = 'none';
-    }, 150);
+    // No-op: do not force open premium modal
   }
 
-  // Override closePremiumModal in Electron/Android web/localhost to block close when gate is active
-  // We do this after auth.js has defined closePremiumModal
   function patchClosePremiumModal() {
-    if (!SHOULD_ENFORCE_PREMIUM_AUTH) return;
-    if (typeof window.closePremiumModal !== 'function') {
-      setTimeout(patchClosePremiumModal, 100);
-      return;
-    }
-    var _originalClose = window.closePremiumModal;
-    window.closePremiumModal = function () {
-      // Block close while gate is active AND user is still authenticated
-      if (_electronGateActive && jflixAuth && jflixAuth.isAuthenticated()) return;
-      _originalClose();
-    };
+    // No-op: allow modal to close normally
   }
-  patchClosePremiumModal();
 
-  // Periodic check: force premium gate if subscription expires (Electron + Android)
   function startElectronPeriodicCheck() {
     setInterval(async function () {
-      try {
-        if (IS_IOS_NATIVE || (!IS_ELECTRON && !IS_ANDROID_WEBVIEW)) return;
-        if (!jflixAuth || !jflixAuth.isAuthenticated()) return;
-        var user = await jflixAuth.fetchCurrentUser();
-        if (!user) { jflixAuth.logout(); showElectronSignIn(); return; }
-        if (!isPremiumActive(user)) {
-          _electronGateActive = true;
-          showElectronPremiumRequired(true);
-        } else {
-          _electronGateActive = false;
-        }
-      } catch (e) {
-        console.error('[Monetization] Error in periodic check:', e);
+      if (typeof window.syncMonetagAdsState === 'function') {
+        window.syncMonetagAdsState();
       }
     }, 30000);
   }
@@ -778,18 +692,14 @@
         hidePremiumBannersInApps();
         if (!IS_IOS_NATIVE) {
           checkAppVersion();
-          runElectronGate();
           startElectronPeriodicCheck();
-          enforcePremiumGateBlocking();
         }
       });
     } else {
       hidePremiumBannersInApps();
       if (!IS_IOS_NATIVE) {
         checkAppVersion();
-        runElectronGate();
         startElectronPeriodicCheck();
-        enforcePremiumGateBlocking();
       }
     }
   }
@@ -807,85 +717,10 @@
     }
   }
 
-  // AGGRESSIVE BLOCKING: Hide entire page content when gate is active
+  // Page content is never hidden; free users and guests can browse and watch with Monetag ads
   function enforcePremiumGateBlocking() {
-    if (!SHOULD_ENFORCE_PREMIUM_AUTH || IS_IOS_NATIVE) return;
-
-    var checkAndBlock = function() {
-      if (_electronGateActive) {
-        // Hide all content except the premium modal
-        var body = document.body;
-        if (body) {
-          // Add a blocking overlay
-          var existingOverlay = document.getElementById('premium-gate-overlay');
-          if (!existingOverlay) {
-            var overlay = document.createElement('div');
-            overlay.id = 'premium-gate-overlay';
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9998;display:none;';
-            body.appendChild(overlay);
-          }
-
-          // Hide all main content containers
-          var contentSelectors = ['header', 'nav', 'main', '.content', '.container', '.movie-grid', '.tv-grid', '.anime-grid', '.cartoon-grid', '.korean-grid', '#featured-section', '#trending-section', '.search-modal', '.quick-view-modal'];
-          contentSelectors.forEach(function(selector) {
-            var elements = document.querySelectorAll(selector);
-            elements.forEach(function(el) {
-              if (el.id !== 'prem-modal') {
-                el.style.display = 'none';
-              }
-            });
-          });
-
-          // Show overlay
-          var overlay = document.getElementById('premium-gate-overlay');
-          if (overlay) overlay.style.display = 'block';
-
-          // Ensure premium modal is visible
-          var premModal = document.getElementById('prem-modal');
-          if (premModal) {
-            premModal.style.display = 'flex';
-            premModal.style.zIndex = '9999';
-          }
-        }
-      } else {
-        // Gate not active - remove blocking overlay
-        var overlay = document.getElementById('premium-gate-overlay');
-        if (overlay) overlay.style.display = 'none';
-      }
-    };
-
-    // Check immediately
-    checkAndBlock();
-
-    // Watch for gate flag changes
-    setInterval(checkAndBlock, 1000);
-
-    // Re-check on page navigation (SPA navigation or hash changes)
-    var originalPushState = history.pushState;
-    var originalReplaceState = history.replaceState;
-    history.pushState = function() {
-      originalPushState.apply(this, arguments);
-      setTimeout(function() {
-        if (jflixAuth && jflixAuth.isAuthenticated()) {
-          checkElectronPremium(false);
-        }
-      }, 500);
-    };
-    history.replaceState = function() {
-      originalReplaceState.apply(this, arguments);
-      setTimeout(function() {
-        if (jflixAuth && jflixAuth.isAuthenticated()) {
-          checkElectronPremium(false);
-        }
-      }, 500);
-    };
-    window.addEventListener('popstate', function() {
-      setTimeout(function() {
-        if (jflixAuth && jflixAuth.isAuthenticated()) {
-          checkElectronPremium(false);
-        }
-      }, 500);
-    });
+    var existingOverlay = document.getElementById('premium-gate-overlay');
+    if (existingOverlay) existingOverlay.style.display = 'none';
   }
 
   // ─── App Version Detection & Forced Update ─────────────────────────────────────

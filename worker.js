@@ -124,7 +124,9 @@ export default {
 
     // Route handling
     console.log('Request pathname:', url.pathname);
-    if (url.pathname.startsWith('/api/auth')) {
+    if (url.pathname.startsWith('/api/app-settings') || url.pathname.startsWith('/api/settings/public')) {
+      return handleAppSettings(request, env, corsHeaders);
+    } else if (url.pathname.startsWith('/api/auth')) {
       console.log('Routing to handleAuth');
       return handleAuth(request, env, corsHeaders);
     } else if (url.pathname.startsWith('/api/comments')) {
@@ -197,6 +199,54 @@ export default {
     await checkNewContentAndNotify(env);
   }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// PUBLIC APP SETTINGS HANDLER & HELPERS
+// ═══════════════════════════════════════════════════════════════
+async function handleAppSettings(request, env, corsHeaders) {
+  try {
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+    const rows = await env.DB.prepare('SELECT key, value FROM app_settings').all();
+    const settings = {};
+    (rows.results || []).forEach(r => { settings[r.key] = r.value; });
+    const hasSetting = ('app_free_access_mode' in settings) || ('app_free_access_with_ads' in settings);
+    const freeAccessWithAds = hasSetting
+      ? (settings.app_free_access_mode === 'enabled' || settings.app_free_access_with_ads === 'enabled')
+      : true;
+    return new Response(JSON.stringify({
+      success: true,
+      settings,
+      freeAccessWithAds,
+      app_free_access_mode: freeAccessWithAds ? 'enabled' : 'disabled'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ success: false, error: err.message }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function isAppFreeAccessEnabled(env) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT value FROM app_settings WHERE key IN ('app_free_access_mode', 'app_free_access_with_ads')"
+    ).all();
+    if (!row.results || row.results.length === 0) {
+      return true;
+    }
+    return row.results.some(r => r.value === 'enabled');
+  } catch (e) {
+    return true;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // AUTO PUSH NOTIFICATIONS — Detect new movies/TV from TMDB
@@ -1763,25 +1813,7 @@ async function handleAdmin(request, env, corsHeaders) {
 
   // ─── App Settings: GET ───
   if (path === '/api/admin/settings' && method === 'GET') {
-    try {
-      await env.DB.prepare(`
-        CREATE TABLE IF NOT EXISTS app_settings (
-          key TEXT PRIMARY KEY,
-          value TEXT NOT NULL,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-      `).run();
-      const rows = await env.DB.prepare('SELECT key, value FROM app_settings').all();
-      const settings = {};
-      (rows.results || []).forEach(r => { settings[r.key] = r.value; });
-      return new Response(JSON.stringify({ success: true, settings }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    } catch (err) {
-      return new Response(JSON.stringify({ success: false, error: err.message }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    return handleAppSettings(request, env, corsHeaders);
   }
 
   // ─── App Settings: PUT ───
@@ -2685,7 +2717,8 @@ async function handleGetCurrentUser(request, env, corsHeaders) {
     const isNativeApp = userAgent.includes('Electron') ||
                         /JFlixNativeApp\/[\d.]+-X7K9Q2M/i.test(userAgent) ||
                         userAgent.includes('JFlix');
-    const blockAccess = isNativeApp && !isPremium;
+    const freeAccessWithAds = await isAppFreeAccessEnabled(env);
+    const blockAccess = !isPremium && !freeAccessWithAds;
 
     return new Response(JSON.stringify({
       success: true,
@@ -2708,6 +2741,7 @@ async function handleGetCurrentUser(request, env, corsHeaders) {
         voucher_code: user.voucher_code
       },
       blockAccess: blockAccess,
+      freeAccessWithAds: freeAccessWithAds,
       isPremium: isPremium
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -3122,13 +3156,15 @@ async function handleSupabaseSignUp(request, env, corsHeaders) {
     
     // User has access if: lifetime premium OR (premium AND not expired)
     const hasAccess = isLifetimePremium || (isPremium && !isSubscriptionExpired);
-    const blockAccess = !hasAccess;
+    const freeAccessWithAds = await isAppFreeAccessEnabled(env);
+    const blockAccess = !hasAccess && !freeAccessWithAds;
 
     return new Response(JSON.stringify({
       success: true,
       isNewUser,
       token: sessionToken,
       blockAccess,
+      freeAccessWithAds,
       user: {
         id: profile.user_id,
         user_id: profile.user_id,
@@ -3298,7 +3334,8 @@ async function handleSupabaseSync(request, env, corsHeaders) {
     
     // User has access if: lifetime premium OR (premium AND not expired)
     const hasAccess = isLifetimePremium || (isPremium && !isSubscriptionExpired);
-    const blockAccess = !hasAccess;
+    const freeAccessWithAds = await isAppFreeAccessEnabled(env);
+    const blockAccess = !hasAccess && !freeAccessWithAds;
 
     return new Response(JSON.stringify({
       success: true,
@@ -3307,6 +3344,7 @@ async function handleSupabaseSync(request, env, corsHeaders) {
       emailVerified,
       activeElsewhere,
       blockAccess,
+      freeAccessWithAds,
       platform,
       user: {
         id: profile.user_id,
@@ -5452,7 +5490,8 @@ async function handleHeartbeat(request, env, corsHeaders) {
     const hasPremiumAccess = isLifetimePremium || 
                            (user.subscription_type === 'premium' && !isSubscriptionExpired);
     
-    let blockAccess = !hasPremiumAccess;
+    const freeAccessWithAds = await isAppFreeAccessEnabled(env);
+    let blockAccess = !hasPremiumAccess && !freeAccessWithAds;
     let needsUpdate = false;
     
     // Auto-downgrade expired subscriptions to free
@@ -5484,7 +5523,7 @@ async function handleHeartbeat(request, env, corsHeaders) {
           const updatedIsLifetimePremium = updatedUser.is_premium_lifetime === 1;
           
           blockAccess = !(updatedIsLifetimePremium || 
-                         (updatedUser.subscription_type === 'premium' && (!updatedSubscriptionExpiry || updatedSubscriptionExpiry > now)));
+                         (updatedUser.subscription_type === 'premium' && (!updatedSubscriptionExpiry || updatedSubscriptionExpiry > now))) && !freeAccessWithAds;
         }
       } catch (recheckErr) {
         console.error('[Heartbeat] Error rechecking user status:', recheckErr);
@@ -5494,6 +5533,7 @@ async function handleHeartbeat(request, env, corsHeaders) {
     return new Response(JSON.stringify({ 
       success: true, 
       blockAccess,
+      freeAccessWithAds,
       needsUpdate
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

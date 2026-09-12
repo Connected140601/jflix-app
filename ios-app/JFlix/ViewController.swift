@@ -29,10 +29,10 @@ class ViewController: UIViewController {
     }
     // Exact hosts always handled in-app.
     private static let allowedHosts = ["jflix.uk", "www.jflix.uk", "jflixuk.pages.dev", "accounts.google.com"]
-    // Suffixes handled in-app (OAuth bounces). Mirrors Electron's
-    // *.google.com + *.supabase.co exceptions — without these, Google
-    // sign-in (Supabase OAuth) cannot complete inside the app.
-    private static let allowedSuffixes = ["google.com", "supabase.co"]
+    // Suffixes handled in-app (OAuth bounces). Covers Google, Supabase, Google APIs & CDNs.
+    private static let allowedSuffixes = [
+        "google.com", "supabase.co", "googleapis.com", "gstatic.com", "googleusercontent.com"
+    ]
 
     private var webView: WKWebView!
     private var downloads: DownloadBridge!
@@ -169,7 +169,15 @@ class ViewController: UIViewController {
     private static func isAllowedHost(_ host: String) -> Bool {
         let h = host.lowercased()
         if allowedHosts.contains(h) { return true }
-        return allowedSuffixes.contains(where: { h == $0 || h.hasSuffix("." + $0) })
+        if allowedSuffixes.contains(where: { h == $0 || h.hasSuffix("." + $0) }) { return true }
+        // Country-specific Google auth domains (e.g. accounts.google.com.ph, google.com.ph, accounts.google.co.uk)
+        if h == "google" || h.contains(".google.") || h.hasPrefix("google.") || h.hasSuffix(".google") || h.contains("google.com") {
+            return true
+        }
+        if h.contains("youtube.com") {
+            return true
+        }
+        return false
     }
 
     /// Keep the screen awake on player/watch pages (main site + aniu).
@@ -370,6 +378,10 @@ extension ViewController: WKNavigationDelegate {
 
         // Non-http(s) schemes (tel:, mailto:, intent fallbacks) -> system handler.
         if scheme != "http" && scheme != "https" {
+            if url.absoluteString == "about:blank" {
+                decisionHandler(.allow)
+                return
+            }
             if UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
@@ -384,14 +396,10 @@ extension ViewController: WKNavigationDelegate {
             return
         }
 
-        // Download/video hosts opened from the app (e.g. VidVault links) go to Safari.
-        if host == "vidvault.ru" || host == "www.vidvault.ru" || url.absoluteString.contains("download") {
+        // External destinations (download links, video hosts, Monetag ad clicks) go to Safari.
+        if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            decisionHandler(.cancel)
-            return
         }
-
-        // Silently block everything else external (same as Android wrapper).
         decisionHandler(.cancel)
     }
 
@@ -401,6 +409,26 @@ extension ViewController: WKNavigationDelegate {
         endRefreshing()
         updateIdleTimer(for: webView.url)
         injectSafeAreaCSS()
+
+        // If webView finished on Supabase OAuth callback or blank redirect, route directly to home
+        if let currentURL = webView.url {
+            let host = (currentURL.host ?? "").lowercased()
+            let path = currentURL.path.lowercased()
+            if host.contains("supabase.co") && (path.contains("callback") || path.contains("/auth/v1/callback")) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self, weak webView] in
+                    guard let self = self, let wv = webView else { return }
+                    if let u = wv.url, (u.host ?? "").lowercased().contains("supabase.co") {
+                        wv.load(URLRequest(url: Self.homeURL))
+                    }
+                }
+                return
+            }
+            if currentURL.absoluteString == "about:blank" {
+                webView.load(URLRequest(url: Self.homeURL))
+                return
+            }
+        }
+
         // Re-assert the platform flag after full load (parity with Android
         // onPageFinished injection) and ensure a mobile viewport exists.
         webView.evaluateJavaScript(
@@ -411,8 +439,9 @@ extension ViewController: WKNavigationDelegate {
             "m.content='width=device-width,initial-scale=1,viewport-fit=cover';" +
             "document.getElementsByTagName('head')[0].appendChild(m);}" +
             "var st=document.createElement('style');" +
-            "st.innerHTML='body{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overflow-x:hidden!important;}.native-hidden{display:none!important;}';" +
-            "document.getElementsByTagName('head')[0].appendChild(st);})();",
+            "st.innerHTML='body{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overflow-x:hidden!important;}.native-hidden{display:none!important;}.mobile-bottom-nav{display:none!important;}body.has-bottom-nav{padding-bottom:0!important;}';" +
+            "document.getElementsByTagName('head')[0].appendChild(st);" +
+            "var bn=document.querySelector('.mobile-bottom-nav');if(bn)bn.remove();if(document.body)document.body.classList.remove('has-bottom-nav');})();",
             completionHandler: nil
         )
     }
@@ -469,16 +498,16 @@ extension ViewController: WKUIDelegate {
             webView.load(navigationAction.request)
             return nil
         }
-        // VidVault / download links go to Safari (Electron + Android parity).
-        // Anything else external is SILENTLY DENIED — never bounced to Safari
-        // (matches Electron's deny and Android's in-WebView block for popups).
-        if host == "vidvault.ru" || host == "www.vidvault.ru" ||
-            url.absoluteString.contains("download") {
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            }
+        // External popups (including Monetag ad popups and new tabs) go to Safari.
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
         return nil
+    }
+
+    func webViewDidClose(_ webView: WKWebView) {
+        // When an OAuth auxiliary popup or window closes, navigate to homepage
+        webView.load(URLRequest(url: Self.homeURL))
     }
 
     // MARK: - Dialog suppression (Electron parity)

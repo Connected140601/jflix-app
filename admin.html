@@ -403,6 +403,39 @@
                   </div>
                 </div>
 
+                <!-- Free Member App Access with Monetag Ads Toggle -->
+                <div style="background:rgba(0,0,0,0.2);border-radius:12px;padding:20px;margin-bottom:16px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+                    <div style="flex:1;">
+                      <div style="color:#fff;font-size:14px;font-weight:600;margin-bottom:4px;">
+                        <i class="fas fa-desktop" style="color:#e50914;margin-right:6px;"></i>Free Member App Access (Electron, Android, iOS &amp; Web with Monetag Ads)
+                      </div>
+                      <div style="color:#888;font-size:12px;line-height:1.5;">
+                        When <strong style="color:#2ecc71;">ON</strong> — The Upgrade to Premium modal has an exit or close button so free members and guests can close it and freely access the website and applications (with Monetag ads). Users with active vouchers or premium remain ad-free.
+                        <br>When <strong style="color:#e50914;">OFF</strong> — The close/exit button on the Upgrade to Premium modal is hidden so users cannot close the modal or access the website and applications without an active voucher or premium upgrade.
+                      </div>
+                    </div>
+                    <!-- Toggle switch -->
+                    <label style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;cursor:pointer;">
+                      <input type="checkbox" id="app-free-access-toggle" style="opacity:0;width:0;height:0;position:absolute;"
+                        onchange="onAppFreeAccessToggleChange(this)">
+                      <span id="app-free-access-track" style="
+                        position:absolute;inset:0;border-radius:28px;background:#444;
+                        transition:background 0.25s;
+                      "></span>
+                      <span id="app-free-access-thumb" style="
+                        position:absolute;top:4px;left:4px;width:20px;height:20px;
+                        border-radius:50%;background:#fff;transition:transform 0.25s;
+                        box-shadow:0 2px 6px rgba(0,0,0,0.4);
+                      "></span>
+                    </label>
+                  </div>
+                  <div id="app-free-access-status" style="margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12px;
+                    background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.25);color:#2ecc71;">
+                    <i class="fas fa-check-circle"></i> <strong>ON</strong> — Free access allowed. Upgrade modal has a close/exit button so users can freely access the website and apps.
+                  </div>
+                </div>
+
                 <div style="margin-bottom: 15px;">
                   <label style="color: #888; font-size: 12px; margin-bottom: 5px; display: block;">Email Tab Password Protection</label>
                   <select id="email-password-protection" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px 15px; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
@@ -5606,6 +5639,57 @@
       }
     }
 
+    // Free member app access toggle visual update & auto-save
+    async function onAppFreeAccessToggleChange(checkbox, isInitialLoad = false) {
+      const track = document.getElementById('app-free-access-track');
+      const thumb = document.getElementById('app-free-access-thumb');
+      const status = document.getElementById('app-free-access-status');
+      if (!track || !thumb || !status) return;
+      const isChecked = checkbox.checked;
+      if (isChecked) {
+        track.style.background = '#2ecc71';
+        thumb.style.transform = 'translateX(24px)';
+        status.style.background = 'rgba(46,204,113,0.08)';
+        status.style.border = '1px solid rgba(46,204,113,0.25)';
+        status.style.color = '#2ecc71';
+        status.innerHTML = '<i class="fas fa-check-circle"></i> <strong>ON</strong> — Free access allowed. Upgrade modal has an exit/close button so users can access the website &amp; apps freely (Monetag ads active).' + (isInitialLoad ? '' : ' <span id="app-free-save-indicator" style="opacity:0.8;font-size:11px;margin-left:6px;"><i class="fas fa-spinner fa-spin"></i> Saving...</span>');
+      } else {
+        track.style.background = '#444';
+        thumb.style.transform = 'translateX(0)';
+        status.style.background = 'rgba(229,9,20,0.08)';
+        status.style.border = '1px solid rgba(229,9,20,0.2)';
+        status.style.color = '#e57373';
+        status.innerHTML = '<i class="fas fa-times-circle"></i> <strong>OFF</strong> — Strict gate active. Close/exit button on Upgrade modal is hidden so users cannot access the website or apps without upgrading/voucher.' + (isInitialLoad ? '' : ' <span id="app-free-save-indicator" style="opacity:0.8;font-size:11px;margin-left:6px;"><i class="fas fa-spinner fa-spin"></i> Saving...</span>');
+      }
+
+      if (!isInitialLoad && adminToken) {
+        try {
+          const val = isChecked ? 'enabled' : 'disabled';
+          const res = await fetch(`${API_URL}/admin/settings`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({
+              app_free_access_mode: val,
+              app_free_access_with_ads: val
+            })
+          });
+          const ind = document.getElementById('app-free-save-indicator');
+          if (res.ok) {
+            if (ind) ind.innerHTML = '<i class="fas fa-check"></i> Saved';
+            setTimeout(() => { if (ind) ind.remove(); }, 2500);
+          } else {
+            if (ind) ind.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Save failed';
+          }
+        } catch (e) {
+          const ind = document.getElementById('app-free-save-indicator');
+          if (ind) ind.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Network error';
+        }
+      }
+    }
+
     // Load settings from API
     async function loadSettings() {
       try {
@@ -5622,6 +5706,14 @@
         if (toggle) {
           toggle.checked = (s.email_domain_restriction === 'enabled');
           onEmailDomainToggleChange(toggle);
+        }
+
+        // Free member app access toggle
+        const freeAccessToggle = document.getElementById('app-free-access-toggle');
+        if (freeAccessToggle) {
+          const isEnabled = (s.app_free_access_mode === 'enabled' || s.app_free_access_with_ads === 'enabled' || (!('app_free_access_mode' in s) && !('app_free_access_with_ads' in s)));
+          freeAccessToggle.checked = isEnabled;
+          onAppFreeAccessToggleChange(freeAccessToggle, true);
         }
 
         // Other settings
@@ -5649,6 +5741,8 @@
     // Save settings to API
     async function saveSettings() {
       const toggle = document.getElementById('email-domain-restriction-toggle');
+      const freeAccessToggle = document.getElementById('app-free-access-toggle');
+      const freeAccessVal = freeAccessToggle && freeAccessToggle.checked ? 'enabled' : 'disabled';
       const emailPasswordProtection = document.getElementById('email-password-protection').value;
       const defaultServer = document.getElementById('default-server').value;
       const adBlockingLevel = document.getElementById('ad-blocking-level').value;
@@ -5656,6 +5750,8 @@
 
       const settings = {
         email_domain_restriction: toggle && toggle.checked ? 'enabled' : 'disabled',
+        app_free_access_mode: freeAccessVal,
+        app_free_access_with_ads: freeAccessVal,
         email_password_protection: emailPasswordProtection,
         default_server: defaultServer,
         ad_blocking_level: adBlockingLevel,

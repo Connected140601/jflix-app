@@ -12,11 +12,13 @@
 
   function canRunAds() {
     if (window.JFLIX_HIDE_ADS === true) return false;
-    var ua = navigator.userAgent;
-    var isElectron = typeof window.IS_ELECTRON_APP !== 'undefined' && window.IS_ELECTRON_APP;
-    var isAndroidNativeApp = /JFlixNativeApp\/[\d.]+-X7K9Q2M/i.test(ua);
+    if (window.isAppUser === true || window.IS_NATIVE_APP === true || window.IS_IOS_APP === true || window.IS_IOS_NATIVE === true) return false;
+    var ua = navigator.userAgent || '';
+    var isElectron = (typeof window.IS_ELECTRON_APP !== 'undefined' && window.IS_ELECTRON_APP) || /Electron/i.test(ua);
+    var isAndroidNativeApp = /JFlixNativeApp\/[\d.]+-X7K9Q2M/i.test(ua) || /JFlix-Android/i.test(ua);
     var isAndroidWebView = /Android/.test(ua) && /wv/.test(ua);
-    return !isElectron && !isAndroidNativeApp && !isAndroidWebView;
+    var isIOSApp = /JFlix-iOS/i.test(ua) || /JFlixNativeApp/i.test(ua);
+    return !isElectron && !isAndroidNativeApp && !isAndroidWebView && !isIOSApp;
   }
 
   function isAdLoadingSuppressed() {

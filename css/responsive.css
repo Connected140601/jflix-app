@@ -161,12 +161,6 @@ input, select, textarea {
   .navbar-right:has(.auth-buttons[style*="flex"]) .user-menu {
     display: none !important;
   }
-  html.is-ios-app .navbar-right .user-menu {
-    display: flex !important;
-  }
-  html.is-ios-app .navbar-right .auth-buttons {
-    display: none !important;
-  }
 
   .auth-buttons button {
     padding: 6px 12px !important;

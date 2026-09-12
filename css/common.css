@@ -2303,9 +2303,31 @@ p#copy-link-feedback.copy-feedback {
   display: none;
 }
 
+/* iOS Native App: Remove bottom navigation (header already features hamburger menu) */
+html.is-ios-app .mobile-bottom-nav,
+body.is-ios-app .mobile-bottom-nav {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  pointer-events: none !important;
+}
+
+html.is-ios-app body.has-bottom-nav,
+body.is-ios-app.has-bottom-nav,
+html.is-ios-app body {
+  padding-bottom: 0 !important;
+}
+
 @media (max-width: 768px) {
   body.has-bottom-nav {
     padding-bottom: calc(65px + var(--safe-bottom)) !important;
+  }
+
+  html.is-ios-app body.has-bottom-nav,
+  body.is-ios-app.has-bottom-nav,
+  html.is-ios-app body {
+    padding-bottom: 0 !important;
   }
 
   .mobile-bottom-nav {
@@ -2459,8 +2481,8 @@ p#copy-link-feedback.copy-feedback {
   justify-content: center;
 }
 
-/* iOS Native App (JFlix-iOS wrapper): complete suppression of download modals,
-   web get-premium navbar button, "Upgrade to Premium" banners, and premium modals.
+/* iOS Native App (JFlix-iOS wrapper): suppression of download modals,
+   web get-premium navbar button, and "Upgrade to Premium" banners.
    Matches Electron and Android native app behavior with unique useragent. */
 html.is-ios-app .premium-banner,
 body.is-ios-app .premium-banner,
@@ -2469,8 +2491,6 @@ html.is-ios-app #jflix-download-premium-modal-user,
 html.is-ios-app #jflix-ios-premium-modal,
 html.is-ios-app #web-get-premium-btn,
 html.is-ios-app .get-premium-btn,
-html.is-ios-app #get-premium-btn,
-html.is-ios-app #prem-modal,
 html.is-ios-app #premium-gate-overlay {
   display: none !important;
 }
@@ -2513,11 +2533,6 @@ html.is-ios-app .user-menu .user-avatar {
 
 html.is-ios-app .user-menu .user-avatar:active {
   transform: scale(0.92);
-}
-
-/* Hide redundant text auth buttons in iOS app in favor of the header profile button */
-html.is-ios-app .auth-buttons {
-  display: none !important;
 }
 
 

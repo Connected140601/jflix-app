@@ -16,6 +16,13 @@
   Pragma: no-cache
   Expires: 0
 
+# Cache control for Service Worker (Monetag verification & PWA updates)
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Service-Worker-Allowed: /
+
 # Cache control for images (longer cache)
 /images/*
   Cache-Control: public, max-age=31536000, immutable

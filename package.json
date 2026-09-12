@@ -13,7 +13,8 @@
     "build-mac-silicon": "electron-builder --mac pkg --arm64",
     "build-mac-intel": "electron-builder --mac pkg --x64",
     "build-all": "electron-builder --mac dmg --x64 --arm64 && electron-builder --win nsis portable",
-    "deploy:testing": "wrangler pages deploy . --project-name=jflixtesting --branch=main --commit-dirty=true"
+    "deploy:testing": "([ -d dist ] && mv dist .wrangler/dist_tmp || true); wrangler pages deploy . --project-name=jflixtesting --branch=main --commit-dirty=true; ([ -d .wrangler/dist_tmp ] && mv .wrangler/dist_tmp dist || true)",
+    "deploy:production": "([ -d dist ] && mv dist .wrangler/dist_tmp || true); wrangler pages deploy . --project-name=jflixuk --branch=main --commit-dirty=true; ([ -d .wrangler/dist_tmp ] && mv .wrangler/dist_tmp dist || true)"
   },
   "author": "JFlix",
   "license": "MIT",

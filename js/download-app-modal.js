@@ -1159,106 +1159,29 @@
   });
 
   function runElectronGate() {
-    if (IS_IOS_NATIVE) return; // iOS native app does not force payment gate
-    waitForAuth(function () {
-      if (!jflixAuth.isAuthenticated()) {
-        showElectronSignIn();
-      } else {
-        checkElectronPremium();
-      }
-    });
+    _electronGateActive = false;
   }
 
   function showElectronSignIn() {
-    jflixAuth.openAuthModal();
-
-    // Patch modal to remove guest button and block close
-    var tryPatch = function (tries) {
-      var modal = document.getElementById('auth-modal');
-      if (!modal) { if (tries < 30) setTimeout(function () { tryPatch(tries + 1); }, 100); return; }
-
-      // Hide "Continue as Guest" button
-      var buttons = modal.querySelectorAll('button');
-      buttons.forEach(function (btn) {
-        if (btn.textContent.trim().toLowerCase().includes('guest')) {
-          btn.style.display = 'none';
-        }
-        // Hide the close (×) button so user must sign in
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('closeAuthModal')) {
-          btn.style.display = 'none';
-        }
-      });
-
-      // Prevent backdrop clicks from bubbling to document (does NOT block inner button clicks)
-      modal.addEventListener('click', function (e) {
-        if (e.target === modal) e.stopPropagation();
-      });
-    };
-    setTimeout(function () { tryPatch(0); }, 50);
+    // No-op on startup: user can click "Sign In" in header if they wish to login
   }
 
   async function checkElectronPremium(wasExpired) {
-    var user = await jflixAuth.fetchCurrentUser();
-    if (!user) {
-      jflixAuth.logout();
-      showElectronSignIn();
-      return;
-    }
-    if (!isPremiumActive(user)) {
-      _electronGateActive = true;
-      showElectronPremiumRequired(wasExpired ||
-        !!(user.subscriptionType === 'premium' || user.subscription_type === 'premium'));
-    } else {
-      _electronGateActive = false;
-    }
+    _electronGateActive = false;
   }
 
   function showElectronPremiumRequired(wasExpired) {
-    // Build/show the premium modal
-    if (typeof openPremiumModal === 'function') {
-      openPremiumModal();
-    } else {
-      setTimeout(function () { showElectronPremiumRequired(wasExpired); }, 200);
-      return;
-    }
-
-    // After a brief moment, hide close button and optionally add expiry warning
-    setTimeout(function () {
-      var modal = document.getElementById('prem-modal');
-      if (!modal) return;
-
-      // Hide the × close button so user can't dismiss without paying
-      var closeBtn = modal.querySelector('button[onclick*="closePremiumModal"]');
-      if (closeBtn) closeBtn.style.display = 'none';
-    }, 150);
+    // No-op: do not force open premium modal
   }
 
-  // Override closePremiumModal in Electron/Android web/localhost to block close when gate is active
-  // We do this after auth.js has defined closePremiumModal
   function patchClosePremiumModal() {
-    if (!SHOULD_ENFORCE_PREMIUM_AUTH) return;
-    if (typeof window.closePremiumModal !== 'function') {
-      setTimeout(patchClosePremiumModal, 100);
-      return;
-    }
-    var _originalClose = window.closePremiumModal;
-    window.closePremiumModal = function () {
-      if (_electronGateActive) return; // Block close while gate is active
-      _originalClose();
-    };
+    // No-op: allow modal to close normally
   }
-  patchClosePremiumModal();
 
-  // Periodic check in Electron: force sign-in if premium expires
   function startElectronPeriodicCheck() {
     setInterval(async function () {
-      if (!IS_ELECTRON || IS_IOS_NATIVE) return;
-      if (!jflixAuth || !jflixAuth.isAuthenticated()) return;
-      var user = await jflixAuth.fetchCurrentUser();
-      if (!user) { jflixAuth.logout(); showElectronSignIn(); return; }
-      if (!isPremiumActive(user)) {
-        _electronGateActive = true;
-        showElectronPremiumRequired(true);
+      if (typeof window.syncMonetagAdsState === 'function') {
+        window.syncMonetagAdsState();
       }
     }, 30000);
   }
@@ -1298,7 +1221,6 @@
         hidePremiumBannersInApps();
         if (!IS_IOS_NATIVE) {
           checkAppVersion();
-          runElectronGate();
           startElectronPeriodicCheck();
         }
       });
@@ -1306,7 +1228,6 @@
       hidePremiumBannersInApps();
       if (!IS_IOS_NATIVE) {
         checkAppVersion();
-        runElectronGate();
         startElectronPeriodicCheck();
       }
     }

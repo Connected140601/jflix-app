@@ -53,6 +53,7 @@ if ((!IS_NATIVE_APP && !IS_LOCALHOST && !IS_IOS_PWA) || IS_IN_APP_BROWSER) {
     token: null,
     openAuthModal: () => console.log('[Auth] Auth modal not available in web browser'),
     closeAuthModal: () => {},
+    toggleAuthTab: () => {},
     logout: () => {},
     fetchCurrentUser: async () => null,
     updateAuthUI: () => {}
@@ -70,6 +71,7 @@ if ((!IS_NATIVE_APP && !IS_LOCALHOST && !IS_IOS_PWA) || IS_IN_APP_BROWSER) {
     token: 'ios-pwa-token',
     openAuthModal: () => {},
     closeAuthModal: () => {},
+    toggleAuthTab: () => {},
     logout: () => {},
     fetchCurrentUser: async () => window.jflixAuth.user,
     updateAuthUI: () => {}
@@ -99,6 +101,120 @@ if (IS_ANDROID_WEBVIEW) {
   document.addEventListener('DOMContentLoaded', hideAdsterraAds);
   document.addEventListener('load', hideAdsterraAds);
 }
+
+// Global helper: Check if native apps and website allow free access with Monetag ads
+window.isAppFreeAccessEnabled = function() {
+  try {
+    if (typeof window._appFreeAccessOverride === 'boolean') {
+      return window._appFreeAccessOverride;
+    }
+    const cached = localStorage.getItem('jflix_app_free_access');
+    if (cached !== null) {
+      return cached === 'true' || cached === 'enabled';
+    }
+  } catch (e) {}
+  return true; // Default to true: free access allowed
+};
+
+// Check if current user has active premium / lifetime / admin
+window.userHasPremiumAccess = function() {
+  const user = window.jflixAuth && typeof window.jflixAuth.getCurrentUser === 'function' ? window.jflixAuth.getCurrentUser() : null;
+  if (!user) return false;
+  const isAdmin = user.is_admin === 1 || user.is_admin === true || user.role === 'admin';
+  const isLifetime = user.is_premium_lifetime === 1 || user.is_premium_lifetime === true || user.isPremiumLifetime;
+  const isPrem = user.subscriptionType === 'premium' || user.subscription_type === 'premium';
+  const expiry = user.subscriptionExpiresAt || user.subscription_expires_at;
+  const expired = expiry && new Date(expiry) < new Date();
+  return !!(isAdmin || isLifetime || (isPrem && !expired));
+};
+
+// Dynamically update close button and sign-out button on Upgrade to Premium modal:
+// - When setting is ON (or user is premium): close/exit button is VISIBLE so user can dismiss modal and access website
+// - When setting is OFF and user is not premium: close/exit button is HIDDEN so user CANNOT close modal or access website
+window.updatePremiumModalCloseButtonState = function() {
+  const modal = document.getElementById('prem-modal');
+  if (!modal) return;
+  const closeBtn = document.getElementById('prem-close-btn') || modal.querySelector('button[onclick*="closePremiumModal"]');
+  const signoutBtn = document.getElementById('egate-signout-btn');
+
+  const hasPremium = window.userHasPremiumAccess();
+  const freeAccessEnabled = typeof window.isAppFreeAccessEnabled === 'function' ? window.isAppFreeAccessEnabled() : true;
+  const canExitModal = hasPremium || freeAccessEnabled;
+
+  if (closeBtn) {
+    if (canExitModal) {
+      closeBtn.style.setProperty('display', 'flex', 'important');
+      closeBtn.style.setProperty('visibility', 'visible', 'important');
+      closeBtn.style.setProperty('opacity', '1', 'important');
+      closeBtn.style.setProperty('pointer-events', 'auto', 'important');
+      closeBtn.removeAttribute('disabled');
+    } else {
+      closeBtn.style.setProperty('display', 'none', 'important');
+      closeBtn.style.setProperty('visibility', 'hidden', 'important');
+      closeBtn.style.setProperty('opacity', '0', 'important');
+      closeBtn.style.setProperty('pointer-events', 'none', 'important');
+      closeBtn.setAttribute('disabled', 'true');
+    }
+  }
+
+  if (signoutBtn) {
+    const user = window.jflixAuth && typeof window.jflixAuth.getCurrentUser === 'function' ? window.jflixAuth.getCurrentUser() : null;
+    if (!canExitModal && user) {
+      signoutBtn.style.setProperty('display', 'inline-flex', 'important');
+    } else {
+      signoutBtn.style.setProperty('display', 'none', 'important');
+    }
+  }
+};
+
+window.enforcePremiumGateIfRequired = function() {
+  // In Electron, Android, and iOS applications: do NOT block access or force login/premium modal on startup.
+  // The application goes directly to the homepage and users can browse and watch freely without signin/login.
+  if (IS_NATIVE_APP || IS_ELECTRON || IS_ANDROID_WEBVIEW || IS_IOS_NATIVE) {
+    return;
+  }
+  const freeAccessEnabled = typeof window.isAppFreeAccessEnabled === 'function' ? window.isAppFreeAccessEnabled() : true;
+  if (freeAccessEnabled) return;
+
+  const hasPremium = window.userHasPremiumAccess();
+  if (!hasPremium) {
+    if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
+    setTimeout(() => {
+      if (typeof openPremiumModal === 'function') {
+        openPremiumModal(false, true);
+        if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+          window.updatePremiumModalCloseButtonState();
+        }
+      }
+    }, 100);
+  }
+};
+
+window.syncAppFreeAccessSetting = async function(apiUrl) {
+  try {
+    const base = apiUrl || (window.jflixAuth && window.jflixAuth.apiUrl) || 'https://jflix-api.junrel-sapantaicloud.workers.dev/api';
+    const res = await fetch(`${base}/app-settings?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      const isEnabled = data.freeAccessWithAds === true ||
+        (data.settings && (data.settings.app_free_access_mode === 'enabled' || data.settings.app_free_access_with_ads === 'enabled'));
+      window._appFreeAccessOverride = isEnabled;
+      try { localStorage.setItem('jflix_app_free_access', isEnabled ? 'true' : 'false'); } catch (_) {}
+
+      if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+        window.updatePremiumModalCloseButtonState();
+      }
+
+      if (!isEnabled && typeof window.enforcePremiumGateIfRequired === 'function') {
+        window.enforcePremiumGateIfRequired();
+      }
+
+      return isEnabled;
+    }
+  } catch (_) {}
+  return window.isAppFreeAccessEnabled();
+};
+try { window.syncAppFreeAccessSetting(); } catch (_) {}
 
 class JFlixAuth {
   constructor(apiUrl) {
@@ -145,6 +261,13 @@ class JFlixAuth {
           this.restoreSessionSilently();
         }
       } catch (e) { /* never block startup on restore */ }
+
+      // Enforce premium gate if free access is disabled in settings
+      setTimeout(() => {
+        if (typeof window.enforcePremiumGateIfRequired === 'function') {
+          window.enforcePremiumGateIfRequired();
+        }
+      }, 500);
     } catch (e) {
       console.error('[Auth] Init error:', e);
     }
@@ -153,6 +276,11 @@ class JFlixAuth {
   // Check if user is authenticated
   isAuthenticated() {
     return !!this.token && !!this.user;
+  }
+
+  // Check if current user has active premium or voucher
+  isPremium() {
+    return typeof window.hasActiveVoucherOrPremium === 'function' ? window.hasActiveVoucherOrPremium() : false;
   }
 
   // Get current user
@@ -241,33 +369,80 @@ class JFlixAuth {
   async handleSupabaseOAuthCallback() {
     console.log('[Auth] Checking for Supabase OAuth callback...');
     
-    // Check if URL has OAuth tokens in hash
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
-      console.log('[Auth] No OAuth tokens in URL hash');
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    const urlParams = new URLSearchParams(search);
+    const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+    
+    const hasAccessToken = hash.includes('access_token') || hashParams.has('access_token') || urlParams.has('access_token');
+    const hasCode = urlParams.has('code') || hashParams.has('code');
+    const hasError = urlParams.has('error') || hashParams.has('error') || search.includes('error=') || hash.includes('error=');
+    
+    if (!hasAccessToken && !hasCode && !hasError) {
+      console.log('[Auth] No OAuth tokens, code, or error in URL');
       return false;
     }
 
-    console.log('[Auth] OAuth tokens detected in URL hash, processing...');
+    console.log('[Auth] OAuth response detected in URL, processing...', { hasAccessToken, hasCode, hasError });
+
+    if (hasError) {
+      const errorDesc = urlParams.get('error_description') || hashParams.get('error_description') || 'Google sign-in was cancelled or encountered an error.';
+      console.warn('[Auth] OAuth redirect returned error:', errorDesc);
+      // Clean up URL and redirect to homepage cleanly
+      try {
+        window.history.replaceState({}, document.title, window.location.origin + '/');
+      } catch (e) {}
+      return false;
+    }
 
     try {
       if (typeof getSupabaseAuthInstance !== 'function') {
         console.error('[Auth] getSupabaseAuthInstance is not available. Cannot process OAuth callback.');
-        return;
+        return false;
       }
       const sb = getSupabaseAuthInstance();
       const supabase = await sb.getClient();
       
-      // Get the session from Supabase
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('[Auth] Error getting Supabase session:', error);
-        return false;
+      let session = null;
+
+      // 1. If PKCE code is present, exchange it for a session
+      if (hasCode) {
+        const code = urlParams.get('code') || hashParams.get('code');
+        console.log('[Auth] Exchanging PKCE code for session...');
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            console.warn('[Auth] exchangeCodeForSession returned error:', error.message);
+          } else if (data && data.session) {
+            session = data.session;
+          }
+        } catch (e) {
+          console.warn('[Auth] Exception during exchangeCodeForSession:', e);
+        }
+      }
+
+      // 2. If session is not set yet, check getSession() (implicit flow or auto-detected by SDK)
+      if (!session) {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (!error && currentSession) {
+          session = currentSession;
+        }
+      }
+
+      // 3. Fallback: wait a short moment in case the SDK is processing auto-detection
+      if (!session) {
+        await new Promise(r => setTimeout(r, 400));
+        const { data: { session: delayedSession } } = await supabase.auth.getSession();
+        if (delayedSession) {
+          session = delayedSession;
+        }
       }
 
       if (!session) {
         console.error('[Auth] No session found after OAuth redirect');
+        try {
+          window.history.replaceState({}, document.title, window.location.origin + '/');
+        } catch (e) {}
         return false;
       }
 
@@ -292,25 +467,37 @@ class JFlixAuth {
         // Show welcome message
         this.showWelcomeMessage();
         
-        // AGGRESSIVE BLOCKING: If server says blockAccess, show premium modal
-        if (backendData.blockAccess === true) {
+        // Handle gate if needed
+        const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+        if (backendData.blockAccess === true && !freeAccessBypass) {
           console.log('[Auth] Server returned blockAccess=true - activating premium gate');
           if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
           setTimeout(() => {
             if (typeof openPremiumModal === 'function') openPremiumModal();
           }, 100);
+        } else {
+          if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
         }
         
-        // Clear URL hash
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Guarantee clean redirect to homepage
+        console.log('[Auth] Successfully authenticated. Redirecting to homepage...');
+        setTimeout(() => {
+          window.location.replace(window.location.origin + '/');
+        }, 150);
         
         return true;
       } else {
         console.error('[Auth] Backend sync failed:', backendData?.error);
+        try {
+          window.history.replaceState({}, document.title, window.location.origin + '/');
+        } catch (e) {}
         return false;
       }
     } catch (error) {
       console.error('[Auth] OAuth callback error:', error);
+      try {
+        window.history.replaceState({}, document.title, window.location.origin + '/');
+      } catch (e) {}
       return false;
     }
   }
@@ -354,21 +541,30 @@ class JFlixAuth {
           localStorage.setItem('jflix_user_id', this.user.user_id || this.user.id);
         }
         console.log('[Auth] User updated. subscription_type:', this.user?.subscription_type);
+        if (typeof window.syncMonetagAdsState === 'function') {
+          window.syncMonetagAdsState();
+        }
 
-        // AGGRESSIVE BLOCKING: If server says blockAccess, show premium modal
-        if (data.blockAccess === true) {
+        if (typeof data.freeAccessWithAds === 'boolean') {
+          window._appFreeAccessOverride = data.freeAccessWithAds;
+          try { localStorage.setItem('jflix_app_free_access', data.freeAccessWithAds ? 'true' : 'false'); } catch (_) {}
+        }
+
+        const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+
+        if (data.blockAccess === true && !freeAccessBypass) {
           console.log('[Auth] Server returned blockAccess=true - user needs premium');
           if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
           setTimeout(() => {
             if (typeof openPremiumModal === 'function') openPremiumModal();
           }, 100);
-        } else if (data.blockAccess === false) {
-          console.log('[Auth] Server returned blockAccess=false - user has premium access');
+        } else {
+          console.log('[Auth] User has access (premium or free access mode active)');
           if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
           // Close premium modal if it's open
           const premiumModal = document.getElementById('prem-modal');
           if (premiumModal && premiumModal.style.display === 'flex') {
-            if (typeof closePremiumModal === 'function') closePremiumModal();
+            if (typeof closePremiumModal === 'function') closePremiumModal(true);
           }
         }
 
@@ -436,16 +632,17 @@ class JFlixAuth {
         this.updateAuthUI();
         
         // Handle premium gate
-        if (data.blockAccess === true) {
+        const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+        if (data.blockAccess === true && !freeAccessBypass) {
           if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
           setTimeout(() => {
             if (typeof openPremiumModal === 'function') openPremiumModal();
           }, 100);
-        } else if (data.blockAccess === false) {
+        } else {
           if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
           const premiumModal = document.getElementById('prem-modal');
           if (premiumModal && premiumModal.style.display === 'flex') {
-            if (typeof closePremiumModal === 'function') closePremiumModal();
+            if (typeof closePremiumModal === 'function') closePremiumModal(true);
           }
         }
         
@@ -500,6 +697,10 @@ class JFlixAuth {
 
       // Update UI
       this.updateAuthUI();
+
+      if (typeof window.syncMonetagAdsState === 'function') {
+        window.syncMonetagAdsState();
+      }
 
       // Refresh nickname manager after logout
       if (window.nicknameManager) {
@@ -646,7 +847,7 @@ class JFlixAuth {
       const expiryDate = this.user.subscriptionExpiresAt || this.user.subscription_expires_at;
       const isExpired = expiryDate && new Date(expiryDate) < new Date();
       
-      const shouldHidePremiumBtn = (isPremium && !isExpired) || IS_IOS_NATIVE;
+      const shouldHidePremiumBtn = (isPremium && !isExpired);
       
       if (shouldHidePremiumBtn) {
         getPremiumBtns.forEach(el => el.style.setProperty('display', 'none', 'important'));
@@ -655,38 +856,15 @@ class JFlixAuth {
       }
 
     } else {
-      // User is logged out
-      if (IS_IOS_NATIVE || IS_NATIVE_APP) {
-        // In iOS and native apps with auth: ALWAYS keep the profile in the header!
-        userMenus.forEach(el => {
-          el.style.setProperty('display', 'flex', 'important');
-          const avatar = el.querySelector('.user-avatar');
-          const name = el.querySelector('.user-name');
-          const crown = el.querySelector('.premium-crown');
-          const link = el.querySelector('a');
-          if (crown) crown.remove();
-          if (avatar) {
-            avatar.src = defaultAvatarSvg;
-            avatar.style.border = '2px solid #e50914';
-            avatar.style.boxShadow = 'none';
-            avatar.alt = 'Sign In / Profile';
-          }
-          if (name) {
-            name.textContent = 'Sign In';
-          }
-          if (link) {
-            link.setAttribute('title', 'Sign In / Profile');
-            link.setAttribute('aria-label', 'Sign In / Profile');
-          }
-        });
-        // In iOS / native apps, profile avatar is the primary header action; hide redundant text button
-        authButtons.forEach(el => el.style.setProperty('display', 'none', 'important'));
-      } else {
-        authButtons.forEach(el => el.style.setProperty('display', 'flex', 'important'));
-        userMenus.forEach(el => el.style.setProperty('display', 'none', 'important'));
-      }
+      // User is logged out: show Sign In button in header so user can log in when desired
+      authButtons.forEach(el => el.style.setProperty('display', 'flex', 'important'));
+      userMenus.forEach(el => el.style.setProperty('display', 'none', 'important'));
       getPremiumBtns.forEach(el => el.style.setProperty('display', 'none', 'important'));
 
+    }
+
+    if (typeof window.syncMonetagAdsState === 'function') {
+      window.syncMonetagAdsState();
     }
   }
 
@@ -695,10 +873,8 @@ class JFlixAuth {
     // Check if modal already exists
     if (document.getElementById('auth-modal')) return;
 
-    const electronNote = SHOULD_SHOW_AUTH_MODAL
-      ? '<div style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:10px 14px;margin-bottom:18px;text-align:center;"><i class="fas fa-crown" style="color:#FFD700;margin-right:6px;"></i><span style="color:#cabd8f;font-size:12px;">Sign in to access JFlix Premium</span></div>'
-      : '';
-    const guestSection = (IS_ANDROID_WEBVIEW_OR_LOCALHOST || IS_ELECTRON) ? '' : `
+    const electronNote = '';
+    const guestSection = `
           <!-- Divider -->
           <div style="display: flex; align-items: center; margin: 25px 0;">
             <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
@@ -709,29 +885,42 @@ class JFlixAuth {
           <button onclick="jflixAuth.closeAuthModal()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 14px; border-radius: 10px; font-size: 14px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';">
             Continue as Guest
           </button>`;
-    const closeBtn = SHOULD_SHOW_AUTH_MODAL ? '' : `<button onclick="jflixAuth.closeAuthModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff';" onmouseout="this.style.background='none'; this.style.color='#888';">&times;</button>`;
+    const closeBtn = `<button onclick="jflixAuth.closeAuthModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff';" onmouseout="this.style.background='none'; this.style.color='#888';">&times;</button>`;
 
     const modalHTML = `
-      <div id="auth-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
-        <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:20px;max-width:450px;width:90%;padding:40px;box-shadow:0 30px 100px rgba(0,0,0,0.6);border:1px solid rgba(229,9,20,0.3);position:relative;max-height:90vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;">
+      <div id="auth-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:16px;box-sizing:border-box;">
+        <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:20px;max-width:450px;width:100%;padding:32px 28px;box-shadow:0 30px 100px rgba(0,0,0,0.6);border:1px solid rgba(229,9,20,0.3);position:relative;max-height:92vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;-webkit-overflow-scrolling:touch;box-sizing:border-box;">
 
           ${closeBtn}
 
           <!-- Logo -->
-          <div style="text-align:center;margin-bottom:28px;">
-            <img src="images/logo.svg" alt="JFlix" style="width:72px;height:72px;border-radius:16px;margin-bottom:14px;">
-            <h2 style="color:#fff;margin:0;font-size:22px;font-weight:bold;">Welcome to JFlix</h2>
-            <p style="color:#888;margin:8px 0 0;font-size:13px;">${IS_SUPABASE_PLATFORM ? 'Sign in to unlock premium access' : 'Sign in to access your profile and features'}</p>
+          <div style="text-align:center;margin-bottom:20px;">
+            <img src="images/logo.svg" alt="JFlix" style="width:68px;height:68px;border-radius:16px;margin-bottom:12px;">
+            <h2 id="auth-modal-title" style="color:#fff;margin:0;font-size:22px;font-weight:bold;">Welcome to JFlix</h2>
+            <p id="auth-modal-subtitle" style="color:#888;margin:6px 0 0;font-size:13px;">${IS_SUPABASE_PLATFORM ? 'Sign in to unlock premium access' : 'Sign in to access your profile and features'}</p>
           </div>
 
           ${electronNote}
 
+          <!-- Segmented Tabs: Sign In / Sign Up -->
+          <div style="display:flex;background:rgba(255,255,255,0.06);border-radius:12px;padding:4px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);gap:4px;">
+            <button id="auth-tab-btn-signin" type="button" style="flex:1;padding:12px 16px;min-height:44px;border-radius:9px;border:none;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(229,9,20,0.4);touch-action:manipulation;box-sizing:border-box;">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+            <button id="auth-tab-btn-signup" type="button" style="flex:1;padding:12px 16px;min-height:44px;border-radius:9px;border:none;background:transparent;color:#aaa;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;box-sizing:border-box;">
+              <i class="fas fa-user-plus"></i> Sign Up
+            </button>
+          </div>
+
+          <!-- Inline Error / Notification Box -->
+          <div id="auth-error-msg" style="display:none;background:rgba(229,9,20,0.18);border:1px solid #e50914;color:#ff6b6b;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;text-align:center;line-height:1.4;"></div>
+
           <!-- Google Sign-In -->
           <div id="supabase-google-signin-btn" style="display:flex;justify-content:center;margin-bottom:6px;"></div>
-          <p style="text-align:center;color:#666;font-size:11px;margin:0 0 20px;">Sign in with your Google account</p>
+          <p id="auth-google-subtext" style="text-align:center;color:#666;font-size:11px;margin:0 0 18px;">Sign in with your Google account</p>
 
           <!-- OR divider -->
-          <div style="display:flex;align-items:center;margin:0 0 20px;">
+          <div style="display:flex;align-items:center;margin:0 0 18px;">
             <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
             <span style="color:#555;padding:0 14px;font-size:11px;letter-spacing:.5px;">OR</span>
             <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
@@ -741,54 +930,60 @@ class JFlixAuth {
           <div id="email-signin-form" style="display:block;">
             <div style="margin-bottom:14px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Email</label>
-              <input type="email" id="signin-email" placeholder="Enter your email" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="email" id="signin-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignIn();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
             <div style="margin-bottom:18px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Password</label>
-              <input type="password" id="signin-password" placeholder="Enter your password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="password" id="signin-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignIn();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
-            <button onclick="jflixAuth.handleEmailSignIn()" style="width:100%;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;transition:all 0.3s;margin-bottom:10px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(229,9,20,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+            <button id="signin-submit-btn" type="button" style="width:100%;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;transition:all 0.3s;margin-bottom:10px;touch-action:manipulation;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(229,9,20,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
               Sign In with Email
             </button>
-            <p style="text-align:center;color:#666;font-size:12px;margin:8px 0 4px;">
-              <a href="#" onclick="jflixAuth.showForgotPasswordModal();return false;" style="color:#888;">Forgot password?</a>
+            <p style="text-align:center;color:#666;font-size:12px;margin:8px 0 6px;">
+              <button id="auth-forgot-password-btn" type="button" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:4px 8px;text-decoration:underline;">Forgot password?</button>
             </p>
-            <p style="text-align:center;color:#666;font-size:12px;margin:0;">
-              Don't have an account? <a href="#" onclick="jflixAuth.toggleAuthTab('signup');return false;" style="color:#e50914;">Sign up</a>
-            </p>
+            <div style="text-align:center;margin-top:14px;padding:6px 0;">
+              <span style="color:#888;font-size:13px;">Don't have an account? </span>
+              <button id="auth-switch-to-signup-btn" type="button" style="background:none;border:none;color:#e50914;font-size:13px;font-weight:700;cursor:pointer;padding:6px 10px;border-radius:6px;text-decoration:underline;display:inline-block;vertical-align:baseline;touch-action:manipulation;" onmouseover="this.style.color='#ff3340'" onmouseout="this.style.color='#e50914'">
+                Sign up
+              </button>
+            </div>
           </div>
 
           <!-- Email sign-up form (hidden by default) -->
           <div id="email-signup-form" style="display:none;">
             <div style="margin-bottom:14px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Name</label>
-              <input type="text" id="signup-name" placeholder="Enter your name" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="text" id="signup-name" placeholder="Enter your name" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignUp();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
             <div style="margin-bottom:14px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Email</label>
-              <input type="email" id="signup-email" placeholder="Enter your email" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="email" id="signup-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignUp();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
             <div style="margin-bottom:14px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Password</label>
-              <input type="password" id="signup-password" placeholder="Create a password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="password" id="signup-password" placeholder="Create a password" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignUp();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
             <div style="margin-bottom:18px;">
               <label style="color:#888;font-size:12px;margin-bottom:5px;display:block;">Confirm Password</label>
-              <input type="password" id="signup-confirm-password" placeholder="Confirm your password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:14px;box-sizing:border-box;">
+              <input type="password" id="signup-confirm-password" placeholder="Confirm your password" onkeydown="if(event.key==='Enter')jflixAuth.handleEmailSignUp();" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 15px;border-radius:8px;font-size:16px;box-sizing:border-box;touch-action:manipulation;">
             </div>
-            <button onclick="jflixAuth.handleEmailSignUp()" style="width:100%;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;transition:all 0.3s;margin-bottom:10px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(229,9,20,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+            <button id="signup-submit-btn" type="button" style="width:100%;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;transition:all 0.3s;margin-bottom:10px;touch-action:manipulation;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(229,9,20,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
               Sign Up with Email
             </button>
-            <p style="text-align:center;color:#666;font-size:12px;margin:0;">
-              Already have an account? <a href="#" onclick="jflixAuth.toggleAuthTab('signin');return false;" style="color:#e50914;">Sign in</a>
-            </p>
+            <div style="text-align:center;margin-top:14px;padding:6px 0;">
+              <span style="color:#888;font-size:13px;">Already have an account? </span>
+              <button id="auth-switch-to-signin-btn" type="button" style="background:none;border:none;color:#e50914;font-size:13px;font-weight:700;cursor:pointer;padding:6px 10px;border-radius:6px;text-decoration:underline;display:inline-block;vertical-align:baseline;touch-action:manipulation;" onmouseover="this.style.color='#ff3340'" onmouseout="this.style.color='#e50914'">
+                Sign in
+              </button>
+            </div>
           </div>
 
           ${guestSection}
 
           <!-- Terms -->
           <p style="color:#555;font-size:11px;text-align:center;margin-top:20px;line-height:1.5;">
-            By signing in, you agree to our <a href="terms.html" style="color:#e50914;">Terms of Service</a> and <a href="privacy.html" style="color:#e50914;">Privacy Policy</a>
+            By continuing, you agree to our <a href="terms.html" style="color:#e50914;">Terms of Service</a> and <a href="privacy.html" style="color:#e50914;">Privacy Policy</a>
           </p>
         </div>
       </div>
@@ -797,6 +992,34 @@ class JFlixAuth {
     const div = document.createElement('div');
     div.innerHTML = modalHTML;
     document.body.appendChild(div);
+
+    // Direct event listener bindings
+    const tabSignin = div.querySelector('#auth-tab-btn-signin');
+    const tabSignup = div.querySelector('#auth-tab-btn-signup');
+    const switchSignup = div.querySelector('#auth-switch-to-signup-btn');
+    const switchSignin = div.querySelector('#auth-switch-to-signin-btn');
+    const forgotBtn = div.querySelector('#auth-forgot-password-btn');
+    const signinBtn = div.querySelector('#signin-submit-btn');
+    const signupBtn = div.querySelector('#signup-submit-btn');
+
+    const doToggleSignin = (e) => { if (e) e.preventDefault(); this.toggleAuthTab('signin'); };
+    const doToggleSignup = (e) => { if (e) e.preventDefault(); this.toggleAuthTab('signup'); };
+
+    if (tabSignin) tabSignin.onclick = doToggleSignin;
+    if (tabSignup) tabSignup.onclick = doToggleSignup;
+    if (switchSignup) switchSignup.onclick = doToggleSignup;
+    if (switchSignin) switchSignin.onclick = doToggleSignin;
+    if (forgotBtn) forgotBtn.onclick = (e) => { if (e) e.preventDefault(); this.showForgotPasswordModal(); };
+    if (signinBtn) signinBtn.onclick = (e) => { if (e) e.preventDefault(); this.handleEmailSignIn(); };
+    if (signupBtn) signupBtn.onclick = (e) => { if (e) e.preventDefault(); this.handleEmailSignUp(); };
+
+    // Clear error on input typing
+    ['signin-email', 'signin-password', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm-password'].forEach(id => {
+      const inp = div.querySelector('#' + id);
+      if (inp) {
+        inp.addEventListener('input', () => this.clearAuthError());
+      }
+    });
 
     // Initialize Supabase Google Sign-In button
     this.initSupabaseGoogleButton();
@@ -927,9 +1150,12 @@ class JFlixAuth {
             jflixAuth.updateAuthUI();
             jflixAuth.closeAuthModal();
             jflixAuth.showWelcomeMessage();
-            if (backendData.blockAccess === true) {
+            const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+            if (backendData.blockAccess === true && !freeAccessBypass) {
               if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
               setTimeout(() => { if (typeof openPremiumModal === 'function') openPremiumModal(); }, 100);
+            } else {
+              if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
             }
           }
         } else {
@@ -942,7 +1168,7 @@ class JFlixAuth {
   }
 
   // Open auth modal
-  openAuthModal() {
+  openAuthModal(initialTab) {
     // Hide auth modal in web browser - only accessible in Electron, Android web, and localhost
     if (typeof IS_WEB !== 'undefined' && IS_WEB) {
       return;
@@ -952,6 +1178,9 @@ class JFlixAuth {
       return;
     }
     this.createAuthModal();
+    if (initialTab) {
+      this.toggleAuthTabDirect(initialTab);
+    }
     const modal = document.getElementById('auth-modal');
     if (modal) {
       modal.style.display = 'flex';
@@ -965,20 +1194,63 @@ class JFlixAuth {
     if (modal) {
       modal.style.display = 'none';
       document.body.style.overflow = '';
+      this.clearAuthError();
+    }
+  }
+
+  // Show inline auth error (works on all platforms without alert popup suppression)
+  showAuthError(message) {
+    const el = document.getElementById('auth-error-msg');
+    if (el) {
+      el.textContent = message;
+      el.style.display = 'block';
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (_) {}
+    } else {
+      try { alert(message); } catch (_) {}
+    }
+  }
+
+  // Clear inline auth error
+  clearAuthError() {
+    const el = document.getElementById('auth-error-msg');
+    if (el) {
+      el.style.display = 'none';
+      el.textContent = '';
     }
   }
 
   // Direct toggle without password check
   toggleAuthTabDirect(tab) {
+    this.clearAuthError();
     const signinForm = document.getElementById('email-signin-form');
     const signupForm = document.getElementById('email-signup-form');
+    const tabSignin = document.getElementById('auth-tab-btn-signin');
+    const tabSignup = document.getElementById('auth-tab-btn-signup');
+    const modalTitle = document.getElementById('auth-modal-title');
+    const modalSubtitle = document.getElementById('auth-modal-subtitle');
+    const googleSubtext = document.getElementById('auth-google-subtext');
+
+    const activeTabStyle = 'flex:1;padding:12px 16px;min-height:44px;border-radius:9px;border:none;background:linear-gradient(135deg,#e50914 0%,#b20710 100%);color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(229,9,20,0.4);touch-action:manipulation;box-sizing:border-box;';
+    const inactiveTabStyle = 'flex:1;padding:12px 16px;min-height:44px;border-radius:9px;border:none;background:transparent;color:#aaa;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:none;touch-action:manipulation;box-sizing:border-box;';
 
     if (tab === 'signin' || tab === 'google' || tab === 'email') {
       if (signinForm) signinForm.style.display = 'block';
       if (signupForm) signupForm.style.display = 'none';
+      if (tabSignin) tabSignin.style.cssText = activeTabStyle;
+      if (tabSignup) tabSignup.style.cssText = inactiveTabStyle;
+      if (modalTitle) modalTitle.textContent = 'Welcome to JFlix';
+      if (modalSubtitle) modalSubtitle.textContent = IS_SUPABASE_PLATFORM ? 'Sign in to unlock premium access' : 'Sign in to access your profile and features';
+      if (googleSubtext) googleSubtext.textContent = 'Sign in with your Google account';
     } else if (tab === 'signup') {
       if (signinForm) signinForm.style.display = 'none';
       if (signupForm) signupForm.style.display = 'block';
+      if (tabSignup) tabSignup.style.cssText = activeTabStyle;
+      if (tabSignin) tabSignin.style.cssText = inactiveTabStyle;
+      if (modalTitle) modalTitle.textContent = 'Create Your Account';
+      if (modalSubtitle) modalSubtitle.textContent = 'Sign up to unlock premium access';
+      if (googleSubtext) googleSubtext.textContent = 'Sign up with your Google account';
     }
   }
 
@@ -989,23 +1261,26 @@ class JFlixAuth {
 
   // Handle email sign-in
   async handleEmailSignIn() {
-    const email = document.getElementById('signin-email').value;
-    const password = document.getElementById('signin-password').value;
+    this.clearAuthError();
+    const emailEl = document.getElementById('signin-email');
+    const passEl = document.getElementById('signin-password');
+    const email = (emailEl ? emailEl.value : '').trim();
+    const password = passEl ? passEl.value : '';
 
     if (!email || !password) {
-      alert('Please enter email and password');
+      this.showAuthError('Please enter email and password');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address');
+      this.showAuthError('Please enter a valid email address');
       return;
     }
 
     // Get the sign-in button and show loading state
-    const signinButton = document.querySelector('#email-signin-form button');
+    const signinButton = document.getElementById('signin-submit-btn') || document.querySelector('#email-signin-form button');
     let originalText = '';
     if (signinButton) {
       signinButton.disabled = true;
@@ -1014,6 +1289,15 @@ class JFlixAuth {
       originalText = signinButton.innerHTML;
       signinButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
     }
+
+    const restoreButton = () => {
+      if (signinButton) {
+        signinButton.disabled = false;
+        signinButton.style.opacity = '1';
+        signinButton.style.cursor = 'pointer';
+        signinButton.innerHTML = originalText;
+      }
+    };
 
     try {
       // Check if email exists with Google sign-in before attempting Supabase sign-in
@@ -1028,13 +1312,7 @@ class JFlixAuth {
       if (checkResponse.ok) {
         const checkData = await checkResponse.json();
         if (checkData.exists && checkData.hasGoogleId) {
-          // Email exists with Google account - show conflict modal
-          if (signinButton) {
-            signinButton.disabled = false;
-            signinButton.style.opacity = '1';
-            signinButton.style.cursor = 'pointer';
-            signinButton.innerHTML = originalText;
-          }
+          restoreButton();
           this.showGoogleEmailConflictModal(email);
           return;
         }
@@ -1057,14 +1335,8 @@ class JFlixAuth {
       });
 
       if (error) {
-        // Reset button on error
-        if (signinButton) {
-          signinButton.disabled = false;
-          signinButton.style.opacity = '1';
-          signinButton.style.cursor = 'pointer';
-          signinButton.innerHTML = originalText;
-        }
-        alert('Sign in failed: ' + error.message);
+        restoreButton();
+        this.showAuthError('Sign in failed: ' + error.message);
         return;
       }
 
@@ -1096,52 +1368,61 @@ class JFlixAuth {
         localStorage.setItem('jflix_user_id', this.user.user_id || this.user.id || '');
         this.closeAuthModal();
         this.updateAuthUI();
+        if (typeof window.syncMonetagAdsState === 'function') {
+          window.syncMonetagAdsState();
+        }
         
-        // AGGRESSIVE BLOCKING: If server says blockAccess, show premium modal
-        if (syncData.blockAccess) {
+        // AGGRESSIVE BLOCKING: If server says blockAccess or free on native app, show premium modal
+        const isPrem = this.user && (this.user.subscriptionType === 'premium' || this.user.subscription_type === 'premium');
+        const expiry = this.user && (this.user.subscriptionExpiresAt || this.user.subscription_expires_at);
+        const expired = expiry && new Date(expiry) < new Date();
+        const isFree = !isPrem || expired;
+        const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+
+        if (syncData.blockAccess && !freeAccessBypass) {
+          if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
           if (typeof openPremiumModal === 'function') {
             openPremiumModal();
           }
+        } else {
+          if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
+        }
+        if (typeof window._onElectronAuthSuccess === 'function') {
+          window._onElectronAuthSuccess();
         }
       } else {
-        // Reset button on sync error
-        if (signinButton) {
-          signinButton.disabled = false;
-          signinButton.style.opacity = '1';
-          signinButton.style.cursor = 'pointer';
-          signinButton.innerHTML = originalText;
-        }
-        alert('Sync failed: ' + syncData.error);
+        restoreButton();
+        this.showAuthError('Sync failed: ' + (syncData.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Email sign-in error:', error);
-      // Reset button on error
-      if (signinButton) {
-        signinButton.disabled = false;
-        signinButton.style.opacity = '1';
-        signinButton.style.cursor = 'pointer';
-        signinButton.innerHTML = originalText;
-      }
-      alert('Sign in failed: ' + error.message);
+      restoreButton();
+      this.showAuthError('Sign in failed: ' + error.message);
     }
   }
 
   // Handle email sign-up
   async handleEmailSignUp() {
-    const name = document.getElementById('signup-name').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    this.clearAuthError();
+    const nameInput = document.getElementById('signup-name');
+    const emailInput = document.getElementById('signup-email');
+    const passwordInput = document.getElementById('signup-password');
+    const confirmPasswordInput = document.getElementById('signup-confirm-password');
+
+    const name = (nameInput ? nameInput.value : '').trim();
+    const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
+    const password = passwordInput ? passwordInput.value : '';
+    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
 
     if (!name || !email || !password || !confirmPassword) {
-      alert('Please fill in all fields');
+      this.showAuthError('Please fill in all fields');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address');
+      this.showAuthError('Please enter a valid email address');
       return;
     }
 
@@ -1158,9 +1439,9 @@ class JFlixAuth {
       }
       if (jflixAuth._emailDomainSettingCache === 'enabled') {
         const ALLOWED = ['gmail.com','outlook.com','yahoo.com','proton.me','icloud.com','deped.gov.ph'];
-        const domain = email.toLowerCase().split('@')[1] || '';
+        const domain = email.split('@')[1] || '';
         if (!ALLOWED.includes(domain)) {
-          alert('Only Gmail, Outlook, Yahoo, Proton, iCloud, and DepEd email addresses are accepted for sign up.');
+          this.showAuthError('Only Gmail, Outlook, Yahoo, Proton, iCloud, and DepEd email addresses are accepted for sign up.');
           return;
         }
       }
@@ -1168,56 +1449,59 @@ class JFlixAuth {
 
     // Validate password strength
     if (password.length < 6) {
-      alert('Password must be at least 6 characters');
+      this.showAuthError('Password must be at least 6 characters');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      this.showAuthError('Passwords do not match');
       return;
     }
 
     // Get the sign-up button and show loading state
-    const signupButton = document.querySelector('#email-signup-form button');
-    let originalText = '';
+    const signupButton = document.getElementById('signup-submit-btn') || document.querySelector('#email-signup-form button');
+    let originalText = 'Sign Up with Email';
     if (signupButton) {
+      originalText = signupButton.innerHTML;
       signupButton.disabled = true;
       signupButton.style.opacity = '0.7';
       signupButton.style.cursor = 'not-allowed';
-      originalText = signupButton.innerHTML;
       signupButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing up...';
     }
 
+    const restoreButton = () => {
+      if (signupButton) {
+        signupButton.disabled = false;
+        signupButton.style.opacity = '1';
+        signupButton.style.cursor = 'pointer';
+        signupButton.innerHTML = originalText;
+      }
+    };
+
     try {
-      // Check if email exists
-      const checkResponse = await fetch(`${this.apiUrl}/auth/check-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      });
+      // Check if email exists with Google
+      try {
+        const checkResponse = await fetch(`${this.apiUrl}/auth/check-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email })
+        });
 
-      if (!checkResponse.ok) {
-        throw new Error(`Email check failed: ${checkResponse.status}`);
-      }
-
-      const checkData = await checkResponse.json();
-
-      if (checkData.exists && checkData.hasGoogleId) {
-        // Reset button before showing conflict modal
-        if (signupButton) {
-          signupButton.disabled = false;
-          signupButton.style.opacity = '1';
-          signupButton.style.cursor = 'pointer';
-          signupButton.innerHTML = originalText;
+        if (checkResponse.ok) {
+          const checkData = await checkResponse.json();
+          if (checkData.exists && checkData.hasGoogleId) {
+            restoreButton();
+            this.showGoogleEmailConflictModal(email);
+            return;
+          }
         }
-        // Email exists with Google account - show conflict modal
-        this.showGoogleEmailConflictModal(email);
-        return;
+      } catch (checkErr) {
+        console.warn('[Auth] Check email preflight error:', checkErr);
       }
 
-      // For Electron/Android: use backend endpoint that bypasses email verification
+      // For Electron/Android/iOS native and localhost: use backend endpoint that bypasses email verification
       if (IS_SUPABASE_PLATFORM) {
         const signupResponse = await fetch(`${this.apiUrl}/auth/supabase/signup`, {
           method: 'POST',
@@ -1231,53 +1515,59 @@ class JFlixAuth {
           })
         });
 
-        if (!signupResponse.ok) {
-          const errorText = await signupResponse.text();
-          const errorData = await signupResponse.json().catch(() => ({}));
-          
-          // Reset button on error
-          if (signupButton) {
-            signupButton.disabled = false;
-            signupButton.style.opacity = '1';
-            signupButton.style.cursor = 'pointer';
-            signupButton.innerHTML = originalText;
-          }
+        let signupData = null;
+        try {
+          signupData = await signupResponse.json();
+        } catch (_) {
+          signupData = null;
+        }
+
+        if (!signupResponse.ok || !signupData || !signupData.success) {
+          restoreButton();
 
           // Check if this is a Google account conflict
-          if (errorData.requiresPasswordLink && errorData.existingProvider === 'google') {
+          if (signupData && signupData.requiresPasswordLink && signupData.existingProvider === 'google') {
             this.showGoogleEmailConflictModal(email);
             return;
           }
 
-          throw new Error(`Signup failed: ${signupResponse.status} - ${errorText}`);
+          const errMsg = (signupData && (signupData.error || signupData.message)) || `Signup failed (${signupResponse.status})`;
+          this.showAuthError('Sign up failed: ' + errMsg);
+          return;
         }
 
-        const signupData = await signupResponse.json();
+        // Restore button state
+        restoreButton();
 
-        if (signupData.success) {
-          this.token = signupData.token;
-          this.user = signupData.user;
-          localStorage.setItem('jflix_auth_token', this.token);
-          localStorage.setItem('jflix_user', JSON.stringify(this.user));
-          localStorage.setItem('jflix_user_id', this.user.user_id || this.user.id || '');
-          this.closeAuthModal();
-          this.updateAuthUI();
+        this.token = signupData.token;
+        this.user = signupData.user;
+        localStorage.setItem('jflix_auth_token', this.token);
+        localStorage.setItem('jflix_user', JSON.stringify(this.user));
+        localStorage.setItem('jflix_user_id', this.user.user_id || this.user.id || '');
+        this.closeAuthModal();
+        this.updateAuthUI();
+        if (typeof window.syncMonetagAdsState === 'function') {
+          window.syncMonetagAdsState();
+        }
 
-          // AGGRESSIVE BLOCKING: If server says blockAccess, show premium modal
-          if (signupData.blockAccess) {
-            if (typeof openPremiumModal === 'function') {
-              openPremiumModal();
-            }
+        // Check if user has active premium/voucher
+        const isPrem = this.user && (this.user.subscriptionType === 'premium' || this.user.subscription_type === 'premium');
+        const expiry = this.user && (this.user.subscriptionExpiresAt || this.user.subscription_expires_at);
+        const expired = expiry && new Date(expiry) < new Date();
+        const isFree = !isPrem || expired;
+        const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+
+        if (signupData.blockAccess && !freeAccessBypass) {
+          if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
+          if (typeof openPremiumModal === 'function') {
+            openPremiumModal();
           }
         } else {
-          // Reset button on error
-          if (signupButton) {
-            signupButton.disabled = false;
-            signupButton.style.opacity = '1';
-            signupButton.style.cursor = 'pointer';
-            signupButton.innerHTML = originalText;
-          }
-          alert('Sign up failed: ' + signupData.error);
+          if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
+        }
+
+        if (typeof window._onElectronAuthSuccess === 'function') {
+          window._onElectronAuthSuccess();
         }
       } else {
         // For web: use Supabase direct sign-up with email verification
@@ -1299,26 +1589,14 @@ class JFlixAuth {
         });
 
         if (error) {
-          // Reset button on error
-          if (signupButton) {
-            signupButton.disabled = false;
-            signupButton.style.opacity = '1';
-            signupButton.style.cursor = 'pointer';
-            signupButton.innerHTML = originalText;
-          }
-          alert('Sign up failed: ' + error.message);
+          restoreButton();
+          this.showAuthError('Sign up failed: ' + error.message);
           return;
         }
 
         if (!data.session) {
-          // Reset button on success (no session means email verification needed)
-          if (signupButton) {
-            signupButton.disabled = false;
-            signupButton.style.opacity = '1';
-            signupButton.style.cursor = 'pointer';
-            signupButton.innerHTML = originalText;
-          }
-          alert('Please check your email to verify your account');
+          restoreButton();
+          this.showAuthError('Please check your email to verify your account');
           return;
         }
 
@@ -1335,9 +1613,16 @@ class JFlixAuth {
           })
         });
 
-        const syncData = await syncResponse.json();
+        let syncData = null;
+        try {
+          syncData = await syncResponse.json();
+        } catch (_) {
+          syncData = null;
+        }
 
-        if (syncData.success) {
+        restoreButton();
+
+        if (syncData && syncData.success) {
           this.token = syncData.token;
           this.user = syncData.user;
           localStorage.setItem('jflix_auth_token', this.token);
@@ -1347,32 +1632,20 @@ class JFlixAuth {
           this.updateAuthUI();
           
           // AGGRESSIVE BLOCKING: If server says blockAccess, show premium modal
-          if (syncData.blockAccess) {
+          const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+          if (syncData.blockAccess && !freeAccessBypass) {
             if (typeof openPremiumModal === 'function') {
               openPremiumModal();
             }
           }
         } else {
-          // Reset button on sync error
-          if (signupButton) {
-            signupButton.disabled = false;
-            signupButton.style.opacity = '1';
-            signupButton.style.cursor = 'pointer';
-            signupButton.innerHTML = originalText;
-          }
-          alert('Sync failed: ' + syncData.error);
+          this.showAuthError('Sync failed: ' + ((syncData && (syncData.error || syncData.message)) || 'Unknown error'));
         }
       }
     } catch (error) {
       console.error('Email sign-up error:', error);
-      // Reset button on error
-      if (signupButton) {
-        signupButton.disabled = false;
-        signupButton.style.opacity = '1';
-        signupButton.style.cursor = 'pointer';
-        signupButton.innerHTML = originalText;
-      }
-      alert('Sign up failed: ' + error.message);
+      restoreButton();
+      this.showAuthError('Sign up failed: ' + error.message);
     }
   }
 
@@ -1947,19 +2220,25 @@ class JFlixAuth {
             await this.fetchCurrentUser();
           }
           
-          // Apply block gate logic automatically
-          if (data.blockAccess === true) {
+          if (typeof data.freeAccessWithAds === 'boolean') {
+            window._appFreeAccessOverride = data.freeAccessWithAds;
+            try { localStorage.setItem('jflix_app_free_access', data.freeAccessWithAds ? 'true' : 'false'); } catch (_) {}
+          }
+
+          const freeAccessBypass = typeof window.isAppFreeAccessEnabled === 'function' && window.isAppFreeAccessEnabled();
+
+          if (data.blockAccess === true && !freeAccessBypass) {
             console.log('[Heartbeat] User needs premium access - activating gate');
             if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
             setTimeout(() => {
               if (typeof openPremiumModal === 'function') openPremiumModal();
             }, 100);
-          } else if (data.blockAccess === false) {
-            console.log('[Heartbeat] User has premium access - deactivating gate');
+          } else {
+            console.log('[Heartbeat] User has access (premium or free access mode active)');
             if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
             const premiumModal = document.getElementById('prem-modal');
             if (premiumModal && premiumModal.style.display === 'flex') {
-              if (typeof closePremiumModal === 'function') closePremiumModal();
+              if (typeof closePremiumModal === 'function') closePremiumModal(true);
             }
           }
         }
@@ -2120,6 +2399,11 @@ const jflixAuth = new JFlixAuth();
 // so without this, cross-file references (monetization.js, inline onclick
 // handlers like jflixAuth.logout()) throw ReferenceError in native apps.
 window.jflixAuth = jflixAuth;
+window.toggleAuthTab = function(tab) {
+  if (window.jflixAuth && typeof window.jflixAuth.toggleAuthTab === 'function') {
+    window.jflixAuth.toggleAuthTab(tab);
+  }
+};
 
 
 // ─── Premium Payment Modal ───────────────────────────────────────────────────
@@ -2251,26 +2535,14 @@ let _premPaypalLoaded = false;
 let _premOpenedFromProfile = false;
 
 function openPremiumModal(fromProfile = false, skipAuthCheck = false) {
-  if (IS_IOS_NATIVE) {
-    console.log('[Auth] openPremiumModal suppressed on iOS native app');
-    return;
-  }
-  if (!jflixAuth.isAuthenticated() && !skipAuthCheck) { jflixAuth.openAuthModal(); return; }
-  
-  // AGGRESSIVE: Always activate gate for free users in native apps, regardless of modal build success
-  const isNativeApp = typeof SHOULD_SHOW_AUTH_MODAL !== 'undefined' && SHOULD_SHOW_AUTH_MODAL;
-  const user = jflixAuth.getCurrentUser();
-  const isPrem = user && (user.subscriptionType === 'premium' || user.subscription_type === 'premium');
-  const expiry = user && (user.subscriptionExpiresAt || user.subscription_expires_at);
-  const expired = expiry && new Date(expiry) < new Date();
-  const isFree = !isPrem || expired;
-  
-  if (isNativeApp && isFree && !fromProfile && !skipAuthCheck) {
-    console.log('[Auth] Activating premium gate for free user in native app');
-    if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = true;
+  if (!jflixAuth.isAuthenticated() && !skipAuthCheck) {
+    const freeAccessEnabled = typeof window.isAppFreeAccessEnabled === 'function' ? window.isAppFreeAccessEnabled() : true;
+    if (freeAccessEnabled) {
+      jflixAuth.openAuthModal();
+      return;
+    }
   }
   
-  // Try to build modal, but don't fail if it errors
   try {
     // Only build modal if it doesn't exist
     if (!document.getElementById('prem-modal')) {
@@ -2285,32 +2557,27 @@ function openPremiumModal(fromProfile = false, skipAuthCheck = false) {
     
     // Only select plan if modal is visible
     setTimeout(() => {
-      if (document.getElementById('prem-modal').style.display === 'flex') {
+      if (document.getElementById('prem-modal') && document.getElementById('prem-modal').style.display === 'flex') {
         _premSelectPlan(JFLIX_PLANS[0]);
       }
     }, 100);
 
-    // Hide close button for free users when opened from auth flow (not from profile modal)
-    // This fully blocks user from closing the modal when they don't have premium access
-    if (isFree && !fromProfile && !skipAuthCheck) {
-      setTimeout(() => {
-        const modal = document.getElementById('prem-modal');
-        if (!modal) return;
-        const closeBtn = modal.querySelector('button[onclick*="closePremiumModal"]');
-        if (closeBtn) closeBtn.style.display = 'none';
-      }, 150);
+    // Apply setting-dependent close button & sign out button states
+    if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+      window.updatePremiumModalCloseButtonState();
     }
+    setTimeout(() => {
+      if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+        window.updatePremiumModalCloseButtonState();
+      }
+    }, 50);
+    setTimeout(() => {
+      if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+        window.updatePremiumModalCloseButtonState();
+      }
+    }, 200);
   } catch (e) {
     console.error('[Auth] Error building premium modal:', e);
-    // Even if modal fails, ensure gate is active
-    if (isNativeApp && isFree && typeof window._electronGateActive !== 'undefined') {
-      window._electronGateActive = true;
-    }
-    
-    // Show fallback blocking message if modal failed
-    if (isNativeApp && isFree) {
-      showFallbackBlockingMessage();
-    }
   }
 
   // If opened for unverified Supabase user – show a notice and allow close
@@ -2322,40 +2589,41 @@ function openPremiumModal(fromProfile = false, skipAuthCheck = false) {
       if (!document.getElementById('prem-verify-notice')) {
         const notice = document.createElement('div');
         notice.id = 'prem-verify-notice';
-        notice.style.cssText = 'background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;text-align:center;font-size:13px;color:#cabd8f;';
-        notice.innerHTML = '<i class="fas fa-envelope" style="color:#FFD700;margin-right:6px;"></i>Verify your email first, or purchase premium access below.';
-        const body = modal.querySelector('.pm-body') || modal.querySelector('[class*="body"]') || modal.children[0];
-        if (body) body.prepend(notice); else modal.prepend(notice);
+        notice.style.cssText = 'background:rgba(255,165,0,.15);border:1px solid rgba(255,165,0,.4);border-radius:10px;padding:10px 14px;margin:0 22px 14px;display:flex;align-items:center;gap:10px;font-size:12px;color:#ffa500;';
+        notice.innerHTML = '<i class="fas fa-info-circle" style="flex-shrink:0;"></i><span>Check your email to verify your account. You can still purchase premium now.</span>';
+        const plansEl = document.getElementById('prem-plans');
+        if (plansEl && plansEl.parentNode) plansEl.parentNode.insertBefore(notice, plansEl);
       }
-      // Allow closing since user isn't gated yet
-      const closeBtn = modal.querySelector('button[onclick*="closePremiumModal"]');
-      if (closeBtn) closeBtn.style.display = 'block';
-      const signoutBtn = document.getElementById('egate-signout-btn');
-      if (signoutBtn) signoutBtn.style.display = 'none';
-    }, 200);
-  }
-
-  // If opened from profile, enable close buttons and hide signout button
-  if (fromProfile) {
-    setTimeout(() => {
-      const modal = document.getElementById('prem-modal');
-      if (!modal) return;
-      
-      // Show close button
-      const closeBtn = modal.querySelector('button[onclick*="closePremiumModal"]');
-      if (closeBtn) closeBtn.style.display = 'block';
-      
-      // Hide signout button
-      const signoutBtn = document.getElementById('egate-signout-btn');
-      if (signoutBtn) signoutBtn.style.display = 'none';
-    }, 200);
+    }, 150);
   }
 }
 
-function closePremiumModal() {
+function closePremiumModal(force = false) {
+  const hasPremium = typeof window.userHasPremiumAccess === 'function' ? window.userHasPremiumAccess() : false;
+  const freeAccessEnabled = typeof window.isAppFreeAccessEnabled === 'function' ? window.isAppFreeAccessEnabled() : true;
+  const canExitModal = force || hasPremium || freeAccessEnabled;
+
+  // When setting is turned OFF, non-premium users CANNOT close the modal (blocked from accessing website)
+  if (!canExitModal) {
+    console.warn('[Premium Modal] Close blocked: Free access is turned OFF in admin settings');
+    return false;
+  }
+
   const m = document.getElementById('prem-modal');
-  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+  if (m) {
+    m.style.display = 'none';
+    const prof = document.getElementById('profile-modal');
+    if (prof && prof.style.display === 'flex') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+  return true;
 }
+
+window.openPremiumModal = openPremiumModal;
+window.closePremiumModal = closePremiumModal;
 
 // Copy jflix.uk to clipboard (for Electron/Android apps)
 function copyJflixUrl() {
@@ -2559,14 +2827,14 @@ function _buildPremiumModal() {
         <div style="height:4px;background:linear-gradient(90deg,#b8860b,#FFD700 40%,#fff8c4 55%,#FFD700 70%,#b8860b);background-size:200% auto;animation:goldShine 3s linear infinite;"></div>
 
         <!-- Close -->
-        <button onclick="closePremiumModal()" style="position:absolute;top:16px;right:16px;z-index:10;width:30px;height:30px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50%;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;"
+        <button id="prem-close-btn" onclick="closePremiumModal()" style="position:absolute;top:16px;right:16px;z-index:10;width:30px;height:30px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50%;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;"
           onmouseover="this.style.background='rgba(229,9,20,.3)';this.style.color='#fff';"
           onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='#888';">&times;</button>
 
         <!-- Header -->
         <div style="padding:28px 26px 20px;text-align:center;">
           <!-- Sign Out Button -->
-          <button onclick="if(typeof window._electronGateActive!=='undefined')window._electronGateActive=false;jflixAuth.logout();closePremiumModal();" style="background:rgba(229,9,20,.15);border:1px solid rgba(229,9,20,.3);color:#e50914;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;"
+          <button id="egate-signout-btn" onclick="if(typeof window._electronGateActive!=='undefined')window._electronGateActive=false;jflixAuth.logout();closePremiumModal(true);" style="background:rgba(229,9,20,.15);border:1px solid rgba(229,9,20,.3);color:#e50914;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;"
             onmouseover="this.style.background='rgba(229,9,20,.3)';"
             onmouseout="this.style.background='rgba(229,9,20,.15)';">
             <i class="fas fa-sign-out-alt"></i> Sign Out
@@ -2625,7 +2893,7 @@ function _buildPremiumModal() {
             <p style="color:#FFD700;font-size:16px;font-weight:800;margin:0 0 16px;text-align:center;background:rgba(255,215,0,.15);border:2px solid #FFD700;border-radius:12px;padding:12px 16px;text-transform:uppercase;letter-spacing:1px;">
               <i class="fas fa-exclamation-circle" style="margin-right:8px;"></i>SERVICE FIRST BEFORE PAYMENT
             </p>
-            <button onclick="closePremiumModal();openChatWithPremiumInstructions();" style="width:100%;padding:16px 20px;background:linear-gradient(135deg,#009cde,#0077b5);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 20px rgba(0,156,222,.4)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none';">
+            <button onclick="closePremiumModal(true);openChatWithPremiumInstructions();" style="width:100%;padding:16px 20px;background:linear-gradient(135deg,#009cde,#0077b5);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 20px rgba(0,156,222,.4)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none';">
               <i class="fas fa-comment" style="font-size:18px;"></i> Message Admin to Buy Premium
             </button>
             <p style="color:#666;font-size:11px;margin:12px 0 0;text-align:center;">Available: GCash · Maya · Maribank · Bank Transfer</p>
@@ -2746,8 +3014,14 @@ function _buildPremiumModal() {
   `;
   document.body.appendChild(wrap);
 
+  if (typeof window.updatePremiumModalCloseButtonState === 'function') {
+    window.updatePremiumModalCloseButtonState();
+  }
+
   document.getElementById('prem-modal').addEventListener('click', e => {
-    if (e.target.id === 'prem-modal') closePremiumModal();
+    if (e.target.id === 'prem-modal') {
+      closePremiumModal(false);
+    }
   });
 
   // Voucher redeem handler in premium modal
@@ -2809,12 +3083,16 @@ async function _premRedeemVoucher() {
     if (data.success) {
       if (status) { status.style.cssText = 'font-size:12px;margin-top:8px;display:block;padding:8px 10px;border-radius:8px;background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.2);'; status.innerHTML = '<i class="fas fa-check-circle"></i> ' + (data.message || 'Premium activated!'); }
       if (input) input.value = '';
+      if (typeof window.deactivateMonetagAds === 'function') {
+        window.deactivateMonetagAds();
+      }
+      try { window.dispatchEvent(new CustomEvent('jflix-voucher-redeemed')); } catch (_) {}
       await jflixAuth.fetchCurrentUser();
       jflixAuth.updateAuthUI();
       // Close the premium gate flag if user is now premium
       if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
       setTimeout(() => {
-        closePremiumModal();
+        closePremiumModal(true);
         // Reload page to apply premium status
         setTimeout(() => location.reload(), 500);
       }, 1800);
@@ -2854,7 +3132,7 @@ async function _premApplyInvitation() {
       jflixAuth.updateAuthUI();
       if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
       setTimeout(() => {
-        closePremiumModal();
+        closePremiumModal(true);
         setTimeout(() => location.reload(), 500);
       }, 2000);
     } else {
@@ -3014,7 +3292,7 @@ function _renderPayPalButton() {
         
         if (result.success) {
           // Show voucher modal
-          closePremiumModal();
+          closePremiumModal(true);
           showPaypalVoucherModal(result.voucherCode, result.days);
         } else {
           msg.style.cssText = 'display:block;background:rgba(229,9,20,.15);color:#e50914;border:1px solid rgba(229,9,20,.2);border-radius:10px;font-size:12px;padding:10px 12px;margin-top:12px;text-align:center;';
@@ -3229,6 +3507,16 @@ async function redeemPaypalVoucher(code) {
       document.getElementById('paypal-voucher-modal').remove();
       document.body.style.overflow = '';
       
+      // Clear gate flag and overlay
+      if (typeof window._electronGateActive !== 'undefined') window._electronGateActive = false;
+      const overlay = document.getElementById('premium-gate-overlay');
+      if (overlay) overlay.style.display = 'none';
+
+      if (typeof window.deactivateMonetagAds === 'function') {
+        window.deactivateMonetagAds();
+      }
+      try { window.dispatchEvent(new CustomEvent('jflix-voucher-redeemed')); } catch (_) {}
+
       // Refresh user data
       await jflixAuth.fetchCurrentUser();
       
@@ -3782,6 +4070,11 @@ async function redeemVoucherFromChat(code) {
       const daysAdded = data.daysAdded || 30;
       const expiryDate = data.subscriptionExpiresAt ? new Date(data.subscriptionExpiresAt).toLocaleDateString() : 'Lifetime';
       await sendChatMessageDirect(`✅ I have redeemed the voucher with ${daysAdded} days valid until ${expiryDate}`);
+
+      if (typeof window.deactivateMonetagAds === 'function') {
+        window.deactivateMonetagAds();
+      }
+      try { window.dispatchEvent(new CustomEvent('jflix-voucher-redeemed')); } catch (_) {}
       
       // Refresh user data
       await jflixAuth.fetchCurrentUser();
@@ -4593,6 +4886,13 @@ async function pmLoadUserProfile() {
   const premiumBtn = document.getElementById('pm-get-premium-btn');
   if (premiumBtn) {
     premiumBtn.style.display = 'flex';
+    premiumBtn.onclick = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      openPremiumModal(true);
+    };
   }
 
   // Handle message admin button visibility
@@ -4818,6 +5118,10 @@ async function pmRedeemVoucher() {
       status.className = 'pm-vs success';
       status.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
       input.value = '';
+      if (typeof window.deactivateMonetagAds === 'function') {
+        window.deactivateMonetagAds();
+      }
+      try { window.dispatchEvent(new CustomEvent('jflix-voucher-redeemed')); } catch (_) {}
       await pmLoadUserProfile();
     } else {
       status.className = 'pm-vs error';
@@ -4981,12 +5285,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forceLogoutHandled = await handleForceLogoutLink();
   if (forceLogoutHandled) return;
 
-  // Electron/Android App/Localhost: show sign-in modal on startup if not authenticated
-  // System browsers excluded - should show Get Premium button instead
-  if (SHOULD_SHOW_AUTH_MODAL && !jflixAuth.isAuthenticated()) {
-    setTimeout(() => jflixAuth.openAuthModal(), 400);
-  } else if (SHOULD_SHOW_AUTH_MODAL && jflixAuth.isAuthenticated()) {
-    // If user is authenticated but modal is open, close it
+  // In Electron, Android, and iOS apps: do NOT automatically open sign-in modal on startup.
+  // The app goes directly to the homepage so users can use the application without signing in or logging in.
+  // If the user wants to sign in, they will click the "Sign In" button in the header.
+  if (jflixAuth.isAuthenticated()) {
     const modal = document.getElementById('auth-modal');
     if (modal && modal.style.display === 'flex') {
       jflixAuth.closeAuthModal();
@@ -5011,6 +5313,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.login-btn').forEach(btn => {
     btn.addEventListener('click', () => jflixAuth.openAuthModal());
   });
+
+  // Delegated click and touch handler for any .login-btn (robust for dynamically created headers)
+  function handleLoginBtnClick(e) {
+    const loginBtn = e.target.closest('.login-btn');
+    if (loginBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (jflixAuth && typeof jflixAuth.openAuthModal === 'function') {
+        jflixAuth.openAuthModal();
+      }
+    }
+  }
+  document.addEventListener('click', handleLoginBtnClick, true);
+  document.addEventListener('touchstart', handleLoginBtnClick, { passive: false, capture: true });
 
   // Add click handlers for logout buttons
   document.querySelectorAll('.logout-btn').forEach(btn => {
@@ -5063,11 +5379,14 @@ document.addEventListener('keydown', (e) => {
     const chatModal = document.getElementById('chat-modal');
     if (chatModal && chatModal.style.display === 'flex') { closeChatModal(); return; }
     const premModal = document.getElementById('prem-modal');
-    if (premModal && premModal.style.display === 'flex') { closePremiumModal(); return; }
+    if (premModal && premModal.style.display === 'flex') {
+      closePremiumModal(false);
+      return;
+    }
     const profileModal = document.getElementById('profile-modal');
     if (profileModal && profileModal.style.display === 'flex') { closeProfileModal(); return; }
-    // In Electron, don't allow closing the auth modal via Escape
-    if (!SHOULD_SHOW_AUTH_MODAL) jflixAuth.closeAuthModal();
+    const authModal = document.getElementById('auth-modal');
+    if (authModal && authModal.style.display === 'flex') { jflixAuth.closeAuthModal(); return; }
   }
 });
 

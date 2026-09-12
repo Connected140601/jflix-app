@@ -1,6 +1,6 @@
 // JFlix Floating Invite/Share Button
 // Shows a floating button at bottom-LEFT (opposite to ANIU button at bottom-right)
-// ONLY shows in Electron app and Android app (unique userAgent) — NOT web browser
+// Active across the whole website, Electron app, Android app, and iOS app.
 // Clicking scrolls to profile modal and highlights Invite Friends + Apply Invitation Code
 
 (function () {
@@ -8,34 +8,21 @@
 
   var API_URL = (window.API_URL || 'https://jflix.uk/api').replace('/api', '') + '/api';
 
-  // Platform detection — ONLY Electron or Android app with unique userAgent
-  var ua = navigator.userAgent || '';
-  var isElectron = /Electron/i.test(ua) || /JFlixElectron/i.test(ua) ||
-                   (typeof window.IS_ELECTRON_APP !== 'undefined' && window.IS_ELECTRON_APP === true);
-  var isAndroidNative = /JFlixAndroid/i.test(ua) ||
-                        (typeof window.IS_ANDROID !== 'undefined' && window.IS_ANDROID === true) ||
-                        (localStorage.getItem('jflix_is_android') === 'true');
-  var isAndroidWebView = /Android/i.test(ua) && /wv/i.test(ua);
-  var isIOSNative = /JFlix-iOS/i.test(ua) ||
-                    (typeof window.IS_IOS_APP !== 'undefined' && window.IS_IOS_APP === true);
-
-  // Only show in native apps — NOT web browser
-  if (!isElectron && !isAndroidNative && !isAndroidWebView && !isIOSNative) return;
-
-  // Global flag to prevent multiple initializations across SPA navigations (per-platform)
-  var flagKey = isElectron ? '__jflixInviteButtonInitialized_electron' :
-                isIOSNative ? '__jflixInviteButtonInitialized_ios' :
-                isAndroidNative ? '__jflixInviteButtonInitialized_android' :
-                '__jflixInviteButtonInitialized_webview';
-  if (window[flagKey]) return;
-  window[flagKey] = true;
+  // Global flag to prevent multiple initializations across SPA navigations
+  if (window.__jflixInviteButtonInitialized) return;
+  window.__jflixInviteButtonInitialized = true;
 
   function removeExistingButton() {
     var existing = document.getElementById('jflix-invite-float');
     if (existing) existing.remove();
-    // Also remove any injected styles
     var style = document.getElementById('jflix-invite-float-style');
     if (style) style.remove();
+
+    // Clean up any legacy duplicate banner if present
+    var oldBanner = document.getElementById('jflix-invite-banner');
+    if (oldBanner) oldBanner.remove();
+    var oldBannerStyle = document.getElementById('jflix-invite-banner-style');
+    if (oldBannerStyle) oldBannerStyle.remove();
   }
 
   function createInviteFloatingButton() {
@@ -46,7 +33,6 @@
     btn.id = 'jflix-invite-float';
     btn.setAttribute('role', 'button');
     btn.setAttribute('aria-label', 'Invite friends and get free premium');
-    btn.style.cssText = 'position:fixed;bottom:calc(76px + max(env(safe-area-inset-bottom, 0px), var(--ios-safe-bottom, 0px)));left:max(20px, env(safe-area-inset-left, 0px));z-index:99997;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,180,0,0.5),0 0 0 2px rgba(255,215,0,0.15);transition:all 0.3s cubic-bezier(0.2,0.8,0.2,1);user-select:none;-webkit-tap-highlight-color:transparent;animation:jflixInvitePulse 2.5s ease-in-out infinite;';
 
     btn.innerHTML = '<i class="fas fa-user-plus" style="color:#1a0a00;font-size:20px;"></i>' +
                     '<span style="position:absolute;top:-5px;right:-5px;background:#e50914;color:#fff;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(229,9,20,0.5);">FREE</span>' +
@@ -55,11 +41,14 @@
     var style = document.createElement('style');
     style.id = 'jflix-invite-float-style';
     style.textContent = '@keyframes jflixInvitePulse{0%,100%{box-shadow:0 4px 20px rgba(255,180,0,0.5),0 0 0 2px rgba(255,215,0,0.15)}50%{box-shadow:0 4px 30px rgba(255,180,0,0.7),0 0 0 8px rgba(255,215,0,0.05)}}' +
+                        '#jflix-invite-float{position:fixed;bottom:26px;left:22px;z-index:99997;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,180,0,0.5),0 0 0 2px rgba(255,215,0,0.15);transition:all 0.3s cubic-bezier(0.2,0.8,0.2,1);user-select:none;-webkit-tap-highlight-color:transparent;animation:jflixInvitePulse 2.5s ease-in-out infinite;}' +
                         '#jflix-invite-float:hover{transform:scale(1.08);box-shadow:0 6px 35px rgba(255,180,0,0.7),0 0 0 4px rgba(255,215,0,0.2)}' +
                         '#jflix-invite-float:hover #jflix-invite-dismiss{opacity:1;}' +
                         '#jflix-invite-float:active{transform:scale(0.95)}' +
                         '@media(max-width:768px){' +
-                        '  #jflix-invite-float{width:48px !important;height:48px !important;bottom:calc(72px + max(env(safe-area-inset-bottom, 0px), var(--ios-safe-bottom, 0px))) !important;left:max(14px, env(safe-area-inset-left, 0px)) !important;}' +
+                        '  #jflix-invite-float{width:48px !important;height:48px !important;bottom:calc(20px + max(env(safe-area-inset-bottom, 0px), var(--ios-safe-bottom, 0px))) !important;left:max(14px, env(safe-area-inset-left, 0px)) !important;}' +
+                        '  body.has-bottom-nav #jflix-invite-float{bottom:calc(72px + max(env(safe-area-inset-bottom, 0px), var(--ios-safe-bottom, 0px))) !important;}' +
+                        '  html.is-ios-app #jflix-invite-float, body.is-ios-app #jflix-invite-float, html.is-ios-app body.has-bottom-nav #jflix-invite-float{bottom:calc(20px + max(env(safe-area-inset-bottom, 0px), var(--ios-safe-bottom, 0px))) !important;}' +
                         '  #jflix-invite-float i{font-size:17px !important;}' +
                         '  #jflix-invite-dismiss{opacity:0.75 !important;}' +
                         '}';
@@ -228,13 +217,18 @@
   }
 
   // Handle SPA navigation: re-create button if removed (e.g., page transition)
-  // but only if we're still in a native app context
-  var observer = new MutationObserver(function(mutations) {
+  var observer = new MutationObserver(function() {
+    if (sessionStorage.getItem('jflix_dismiss_invite_btn') === 'true') return;
     if (!document.getElementById('jflix-invite-float')) {
-      // Button was removed, re-create it
       createInviteFloatingButton();
     }
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  if (document.body) {
+    observer.observe(document.body, { childList: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.body) observer.observe(document.body, { childList: true });
+    });
+  }
 
 })();

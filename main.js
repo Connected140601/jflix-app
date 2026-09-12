@@ -30,7 +30,7 @@ function resolveAppUrl() {
   } catch (err) {
     console.error('[App] Failed to read jflix-env.json:', err.message);
   }
-  return 'https://jflixtesting.pages.dev';
+  return 'https://jflix.uk';
 }
 
 let mainWindow;
@@ -156,10 +156,12 @@ function createWindow() {
         return;
       }
 
-      // Silently block navigation to different domains
+      // Prevent external navigation from replacing JFlix inside the Electron window;
+      // open external destinations (including ad links) in default system browser.
       if (newDomain !== currentDomain) {
         event.preventDefault();
-        console.log('[Navigation Blocked] External navigation prevented:', url);
+        console.log('[Navigation] Opening external destination in system browser:', url);
+        shell.openExternal(url);
       }
     } catch (e) {
       event.preventDefault();
@@ -204,9 +206,10 @@ function createWindow() {
         return { action: 'deny' };
       }
 
-      // Silently block external links
+      // Open external links (ads, external destinations) in system browser
       if (newDomain !== currentDomain) {
-        console.log('[Navigation Blocked] External link prevented:', url);
+        console.log('[Window Open] External link - opening in system browser:', url);
+        shell.openExternal(url);
         return { action: 'deny' };
       }
 
